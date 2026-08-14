@@ -20,6 +20,10 @@ test.describe("バイタル入力・便・食事", () => {
     const body = page.getByTestId("body-figure");
     await expect(body).toHaveAttribute("data-fever", "none");
 
+    await page.getByTestId("vital-temp-select").selectOption("34.0");
+    await expect(body).toHaveAttribute("data-fever", "low");
+    await expect(page.getByTestId("temp-status-chip")).toHaveText("低体温");
+
     await page.getByTestId("vital-temp-select").selectOption("36.5");
     await expect(body).toHaveAttribute("data-fever", "normal");
     await expect(page.getByTestId("temp-status-chip")).toHaveText("平熱");
@@ -68,6 +72,141 @@ test.describe("バイタル入力・便・食事", () => {
     await page.getByTestId("sheet-save").click();
     await expect(page.getByTestId("toast")).toHaveText("なおしました");
     await expect(page.getByTestId("vital-hour-row-15")).toContainText("36.9℃");
+  });
+
+  test("(i-5) 体重で人体SVGの体型が変わる（45kg以下=細い/65kg以上=太い）", async ({
+    page,
+  }) => {
+    await openApp(page, undefined, "/?tab=input");
+
+    const body = page.getByTestId("body-figure");
+    await expect(body).toHaveAttribute("data-build", "none");
+
+    await page.getByTestId("vital-weight").fill("40");
+    await expect(body).toHaveAttribute("data-build", "thin");
+
+    await page.getByTestId("vital-weight").fill("55");
+    await expect(body).toHaveAttribute("data-build", "normal");
+
+    await page.getByTestId("vital-weight").fill("70");
+    await expect(body).toHaveAttribute("data-build", "heavy");
+  });
+
+  test("(i-6) エフェクトは記録後も持続する（その日の最新記録の値で判定）", async ({
+    page,
+  }) => {
+    await openApp(page, undefined, "/?tab=input");
+    const body = page.getByTestId("body-figure");
+
+    // 高熱+太い体重を記録 → 入力欄はクリアされるがエフェクトは持続
+    await page.getByTestId("vital-temp-select").selectOption("38.5");
+    await page.getByTestId("vital-weight").fill("70");
+    await page.getByTestId("vital-save").click();
+    await expect(page.getByTestId("vital-temp-select")).toHaveValue("");
+    await expect(body).toHaveAttribute("data-fever", "high");
+    await expect(body).toHaveAttribute("data-build", "heavy");
+    // チップもシルエット同様、その日の最新記録から持続表示される
+    await expect(page.getByTestId("temp-status-chip")).toHaveText("高熱");
+
+    // リロードしても持続（localStorageの記録から判定）
+    await page.reload();
+    await expect(body).toHaveAttribute("data-fever", "high");
+    await expect(body).toHaveAttribute("data-build", "heavy");
+
+    // 入力中の値は記録より優先される
+    await page.getByTestId("vital-temp-select").selectOption("36.5");
+    await expect(body).toHaveAttribute("data-fever", "normal");
+
+    // 記録の無い前日に移動するとデフォルトに戻る
+    await page.getByTestId("vital-temp-select").selectOption("");
+    await page.getByTestId("prev-day").click();
+    await expect(body).toHaveAttribute("data-fever", "none");
+    await expect(body).toHaveAttribute("data-build", "none");
+  });
+
+  test("(i-7) 脈拍で心臓が変化する（常時表示・高い=効果線・低い=青・持続）", async ({
+    page,
+  }) => {
+    await openApp(page, undefined, "/?tab=input");
+
+    const body = page.getByTestId("body-figure");
+    const heart = page.getByTestId("heart");
+
+    // 未入力でも心臓は表示され、通常の心拍で拍動（レベルはnone・効果線なし・赤）
+    await expect(heart).toBeVisible();
+    await expect(body).toHaveAttribute("data-pulse", "none");
+    await expect(page.getByTestId("heart-effect-lines")).toHaveCount(0);
+    expect(await heart.locator("path").getAttribute("fill")).toBe("#e0484f");
+
+    // 高い(100超): 効果線が出る
+    await page.getByTestId("vital-pulse").fill("120");
+    await expect(body).toHaveAttribute("data-pulse", "high");
+    await expect(page.getByTestId("heart-effect-lines")).toBeVisible();
+
+    // 低い(60未満): 心臓が青くなり効果線は消える
+    await page.getByTestId("vital-pulse").fill("50");
+    await expect(body).toHaveAttribute("data-pulse", "low");
+    await expect(page.getByTestId("heart-effect-lines")).toHaveCount(0);
+    expect(await heart.locator("path").getAttribute("fill")).toBe("#4a90d9");
+
+    // 通常(60〜100): 赤に戻る
+    await page.getByTestId("vital-pulse").fill("70");
+    await expect(body).toHaveAttribute("data-pulse", "normal");
+    expect(await heart.locator("path").getAttribute("fill")).toBe("#e0484f");
+
+    // 記録後も持続し、リロードしても保たれる
+    await page.getByTestId("vital-pulse").fill("120");
+    await page.getByTestId("vital-save").click();
+    await expect(page.getByTestId("vital-pulse")).toHaveValue("");
+    await expect(body).toHaveAttribute("data-pulse", "high");
+    await page.reload();
+    await expect(body).toHaveAttribute("data-pulse", "high");
+
+    // 記録の無い前日ではnoneに戻る（心臓自体は表示されたまま）
+    await page.getByTestId("prev-day").click();
+    await expect(body).toHaveAttribute("data-pulse", "none");
+    await expect(heart).toBeVisible();
+  });
+
+  test("(i-8) 血圧で腕の血管とめまいエフェクトが変化する", async ({ page }) => {
+    await openApp(page, undefined, "/?tab=input");
+
+    const body = page.getByTestId("body-figure");
+    await expect(body).toHaveAttribute("data-bp", "none");
+    await expect(page.getByTestId("bp-veins")).toHaveCount(0);
+    await expect(page.getByTestId("dizzy-marks")).toHaveCount(0);
+
+    // 高血圧(140以上): 腕に血管が浮き出る（点滅）
+    await page.getByTestId("vital-bp-sys").fill("150");
+    await expect(body).toHaveAttribute("data-bp", "high");
+    await expect(page.getByTestId("bp-veins")).toBeVisible();
+    await expect(page.getByTestId("dizzy-marks")).toHaveCount(0);
+
+    // 低血圧(90未満): めまいの渦巻きマーク
+    await page.getByTestId("vital-bp-sys").fill("85");
+    await expect(body).toHaveAttribute("data-bp", "low");
+    await expect(page.getByTestId("dizzy-marks")).toBeVisible();
+    await expect(page.getByTestId("bp-veins")).toHaveCount(0);
+
+    // 通常(90〜139): どちらも消える
+    await page.getByTestId("vital-bp-sys").fill("120");
+    await expect(body).toHaveAttribute("data-bp", "normal");
+    await expect(page.getByTestId("bp-veins")).toHaveCount(0);
+    await expect(page.getByTestId("dizzy-marks")).toHaveCount(0);
+
+    // 記録後も持続し、リロードしても保たれる
+    await page.getByTestId("vital-bp-sys").fill("150");
+    await page.getByTestId("vital-bp-dia").fill("95");
+    await page.getByTestId("vital-save").click();
+    await expect(page.getByTestId("vital-bp-sys")).toHaveValue("");
+    await expect(body).toHaveAttribute("data-bp", "high");
+    await page.reload();
+    await expect(body).toHaveAttribute("data-bp", "high");
+    await expect(page.getByTestId("bp-veins")).toBeVisible();
+
+    // 記録の無い前日ではnoneに戻る
+    await page.getByTestId("prev-day").click();
+    await expect(body).toHaveAttribute("data-bp", "none");
   });
 
   test("(i-4) 部分入力を複数回記録しても、履歴の時間行に全項目が統合表示される（バグ報告の再現）", async ({

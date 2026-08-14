@@ -68,9 +68,10 @@ export const delBtn: CSSProperties = {
   cursor: "pointer",
 };
 
-/** 白カード */
+/** 白カード（背景と同化しないよう境界線をはっきり出す） */
 export const card: CSSProperties = {
   background: "#fff",
+  border: "1.5px solid #a8cfe8",
   borderRadius: 16,
   boxShadow: "0 2px 10px rgba(43,113,166,.08)",
   overflow: "hidden",

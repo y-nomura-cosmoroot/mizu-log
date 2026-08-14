@@ -95,6 +95,8 @@ export default function IntakePanel({
       <div style={{ display: "flex", gap: 6, alignItems: "center", paddingTop: 6 }}>
         <input
           data-testid={`custom-${kind}-input`}
+          type="number"
+          min={0}
           value={customMl || ""}
           onChange={(e) => onCustomChange(parseInt(e.target.value, 10) || 0)}
           inputMode="numeric"

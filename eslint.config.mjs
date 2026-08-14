@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // E2E用の本番ビルド出力（playwright.config.ts が NEXT_DIST_DIR で生成）
+    ".next-e2e/**",
     // Claude Design のデザインモック（実装対象外の参照資料）
     "design/**",
   ]),

@@ -2,16 +2,23 @@
 
 import { inputBox } from "@/lib/styles";
 import { hourOf, targetMinute } from "@/lib/time";
+import { bpLevelOf, buildEffectOf, feverOf, pulseEffectOf } from "@/lib/vitalEffects";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { VitalRecord } from "@/types/records";
-import BodyFigure, { feverOf } from "./BodyFigure";
+import BodyFigure from "./BodyFigure";
 
 const TEMP_OPTIONS: string[] = [];
 for (let t = 340; t <= 410; t++) TEMP_OPTIONS.push((t / 10).toFixed(1));
 
-const FEVER_LABEL = { normal: "平熱", mild: "微熱", high: "高熱" } as const;
+const FEVER_LABEL = {
+  low: "低体温",
+  normal: "平熱",
+  mild: "微熱",
+  high: "高熱",
+} as const;
 const FEVER_CHIP = {
+  low: { background: "#e3f4fd", color: "#2f7fb8" },
   normal: { background: "#dff0e3", color: "#2e7d4f" },
   mild: { background: "#fdf1dc", color: "#b0761a" },
   high: { background: "#fdeaea", color: "#c2453a" },
@@ -78,7 +85,13 @@ export default function VitalsCard() {
   const lastP = lastWith("pulse");
   const lastW = lastWith("weight");
 
-  const fever = feverOf(vitalInput.temp);
+  // エフェクト（シルエットの色・体型・チップ）は「入力中の値」を優先し、無ければ
+  // 「その日の最新記録の値」で判定する。記録して入力欄がクリアされても、
+  // 未入力でも、その日の記録がある限りエフェクトを出し続ける（ユーザ指示）
+  const fever = feverOf(vitalInput.temp || lastT?.temp || "");
+  const build = buildEffectOf(vitalInput.weight || lastW?.weight || "");
+  const pulse = pulseEffectOf(vitalInput.pulse || lastP?.pulse || "");
+  const bp = bpLevelOf(vitalInput.bpSys || lastBP?.bpSys || "");
 
   const save = () => {
     const v = vitalInput;
@@ -183,7 +196,7 @@ export default function VitalsCard() {
             alignSelf: "stretch",
           }}
         >
-          <BodyFigure level={fever} />
+          <BodyFigure level={fever} build={build} pulse={pulse} bp={bp} />
         </div>
 
         {/* 血圧 */}
