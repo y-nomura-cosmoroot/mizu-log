@@ -131,11 +131,11 @@ function flag(kind: "stool" | "meal", h: number): FlagRecord {
 }
 
 describe("groupVitalEntriesByBandHour", () => {
-  it("同時間の最新バイタルが行サマリになる", () => {
+  it("同一項目は同時間の最新値が行サマリになる", () => {
     const vitals = [vital(15, 10, { temp: "36.5" }), vital(15, 50, { temp: "37.8" })];
     const groups = groupVitalEntriesByBandHour(vitals, [], D);
     const h15 = groups[0].hours.find((h) => h.hour === 15)!;
-    expect(h15.latestVital?.temp).toBe("37.8");
+    expect(h15.summary?.temp).toBe("37.8");
     expect(h15.items).toHaveLength(2);
   });
   it("便・食事は件数として集計される", () => {
@@ -144,13 +144,122 @@ describe("groupVitalEntriesByBandHour", () => {
     const h9 = groups[2].hours.find((h) => h.hour === 9)!;
     expect(h9.stoolCount).toBe(2);
     expect(h9.mealCount).toBe(1);
-    expect(h9.latestVital).toBeNull();
+    expect(h9.summary).toBeNull();
   });
   it("記録が無い帯はempty", () => {
     const groups = groupVitalEntriesByBandHour([], [flag("meal", 8)], D);
     expect(groups[0].empty).toBe(true);
     expect(groups[1].empty).toBe(true);
     expect(groups[2].empty).toBe(false);
+  });
+});
+
+describe("groupVitalEntriesByBandHour: 部分入力レコードの行サマリ統合（バイタルは全項目任意）", () => {
+  const summaryOf = (vitals: VitalRecord[], hour: number) => {
+    const groups = groupVitalEntriesByBandHour(vitals, [], D);
+    for (const b of groups) {
+      const g = b.hours.find((h) => h.hour === hour);
+      if (g) return g.summary;
+    }
+    return null;
+  };
+
+  it("バグ報告の再現: 1回目=体温+体重、2回目=血圧+脈拍 → 全項目が表示される", () => {
+    const vitals = [
+      vital(14, 0, { temp: "34.0", weight: "68" }),
+      vital(14, 0, { bpSys: "119", bpDia: "75", pulse: "77" }),
+    ];
+    expect(summaryOf(vitals, 14)).toEqual({
+      temp: "34.0",
+      bpSys: "119",
+      bpDia: "75",
+      pulse: "77",
+      weight: "68",
+    });
+  });
+
+  it("同じ項目が複数レコードにある場合は後の記録が優先される", () => {
+    const vitals = [
+      vital(14, 10, { temp: "36.5", pulse: "60" }),
+      vital(14, 40, { temp: "37.2", weight: "55.5" }),
+    ];
+    expect(summaryOf(vitals, 14)).toEqual({
+      temp: "37.2",
+      bpSys: "",
+      bpDia: "",
+      pulse: "60",
+      weight: "55.5",
+    });
+  });
+
+  it("血圧は上下ペアで採用される（上が入っているレコードの上下を使う）", () => {
+    const vitals = [
+      vital(14, 10, { bpSys: "110", bpDia: "70" }),
+      vital(14, 40, { bpSys: "125", bpDia: "" }),
+    ];
+    const s = summaryOf(vitals, 14)!;
+    expect(s.bpSys).toBe("125");
+    expect(s.bpDia).toBe(""); // 後のレコードのペアをそのまま採用
+  });
+
+  it("全組み合わせ網羅: 2レコード×各項目(体温/血圧/脈拍/体重)の有無 256通りで、項目ごとに最新の非空値が採用される", () => {
+    // 項目キー: t=体温, b=血圧(上下ペア), p=脈拍, w=体重
+    const FIELDS = ["t", "b", "p", "w"] as const;
+    type Field = (typeof FIELDS)[number];
+    const VALUES: Record<"r1" | "r2", Record<Field, Partial<VitalRecord>>> = {
+      r1: {
+        t: { temp: "36.0" },
+        b: { bpSys: "110", bpDia: "70" },
+        p: { pulse: "60" },
+        w: { weight: "50" },
+      },
+      r2: {
+        t: { temp: "37.5" },
+        b: { bpSys: "125", bpDia: "82" },
+        p: { pulse: "72" },
+        w: { weight: "55.5" },
+      },
+    };
+    const subsets: Field[][] = [];
+    for (let bits = 0; bits < 16; bits++) {
+      subsets.push(FIELDS.filter((_, i) => bits & (1 << i)));
+    }
+
+    let checked = 0;
+    for (const s1 of subsets) {
+      for (const s2 of subsets) {
+        // UI上、全項目空のレコードは保存できないため空レコードは作らない
+        const vitals: VitalRecord[] = [];
+        if (s1.length) {
+          vitals.push(
+            vital(14, 10, Object.assign({}, ...s1.map((f) => VALUES.r1[f])))
+          );
+        }
+        if (s2.length) {
+          vitals.push(
+            vital(14, 40, Object.assign({}, ...s2.map((f) => VALUES.r2[f])))
+          );
+        }
+        const summary = summaryOf(vitals, 14);
+        if (!vitals.length) {
+          expect(summary).toBeNull();
+          continue;
+        }
+        // 期待値: 項目ごとに「後のレコードにあればr2の値、無ければr1の値、どちらにも無ければ空」
+        const pick = (f: Field): Partial<VitalRecord> =>
+          s2.includes(f) ? VALUES.r2[f] : s1.includes(f) ? VALUES.r1[f] : {};
+        const expected = {
+          temp: pick("t").temp ?? "",
+          bpSys: pick("b").bpSys ?? "",
+          bpDia: pick("b").bpDia ?? "",
+          pulse: pick("p").pulse ?? "",
+          weight: pick("w").weight ?? "",
+        };
+        expect(summary, `s1=[${s1}] s2=[${s2}]`).toEqual(expected);
+        checked++;
+      }
+    }
+    expect(checked).toBe(255); // 両方空の1通りを除く全組み合わせ
   });
 });
 

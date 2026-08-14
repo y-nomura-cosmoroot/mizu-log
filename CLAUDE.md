@@ -34,7 +34,7 @@
 - [src/app/](src/app/) — `layout.tsx`（robotsメタ+Noto Sans JP）・`page.tsx`・`robots.ts`・`globals.css`（keyframes）
 - [src/components/](src/components/) — `AppShell.tsx`（タブ+`?tab=`URL同期+ハイドレーションゲート）と共通UI。配下に `home/` `input/` `meds/` `history/` `sheets/`
 - [src/lib/](src/lib/) — **Reactに依存しない純粋関数のみ**。`time.ts`（記録日・帯判定）・`aggregate.ts`（集計）・`meds.ts`・`calendar.ts`・`constants.ts`（GOAL_ML=2000, QUICK_AMOUNTS=[50,100,150,200]）・`styles.ts`
-- [src/stores/](src/stores/) — `useAppStore.ts`（永続データ、zustand persist v1）・`useUiStore.ts`（非永続UI状態）
+- [src/stores/](src/stores/) — `useAppStore.ts`（永続データ、zustand persist **v2**。v1→v2は薬の量 `dose`→`doseAmount`+`doseUnit` 分割）・`useUiStore.ts`（非永続UI状態）
 - [src/types/records.ts](src/types/records.ts) — 全データ型
 - [`src/lib/__tests__/`](src/lib/__tests__/) — Vitest、[e2e/](e2e/) — Playwright
 - [docs/plans/](docs/plans/) — 要件定義・実装計画、[design/](design/) — デザインモック（lint対象外）

@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // スマホで入力欄フォーカス時の自動ズーム（フォーカスを外しても戻らない）を防ぐ
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

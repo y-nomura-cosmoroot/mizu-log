@@ -11,6 +11,16 @@ test.describe("検索除け", () => {
     expect(content).toContain("nofollow");
   });
 
+  test("viewportメタでズーム禁止（入力フォーカス時の自動ズーム防止）", async ({ page }) => {
+    await page.goto("/");
+    const content = await page
+      .locator('meta[name="viewport"]')
+      .first()
+      .getAttribute("content");
+    expect(content).toContain("maximum-scale=1");
+    expect(content).toContain("user-scalable=no");
+  });
+
   test("robots.txt が全クローラーをDisallow", async ({ request }) => {
     const res = await request.get("/robots.txt");
     expect(res.ok()).toBeTruthy();

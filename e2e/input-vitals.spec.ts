@@ -70,6 +70,48 @@ test.describe("バイタル入力・便・食事", () => {
     await expect(page.getByTestId("vital-hour-row-15")).toContainText("36.9℃");
   });
 
+  test("(i-4) 部分入力を複数回記録しても、履歴の時間行に全項目が統合表示される（バグ報告の再現）", async ({
+    page,
+  }) => {
+    await openApp(page, undefined, "/?tab=input");
+
+    // 1回目: 体温 + 体重 だけ記録
+    await page.getByTestId("vital-temp-select").selectOption("34.0");
+    await page.getByTestId("vital-weight").fill("68");
+    await page.getByTestId("vital-save").click();
+
+    // 2回目: 血圧 + 脈拍 だけ記録
+    await page.getByTestId("vital-bp-sys").fill("119");
+    await page.getByTestId("vital-bp-dia").fill("75");
+    await page.getByTestId("vital-pulse").fill("77");
+    await page.getByTestId("vital-save").click();
+
+    // 履歴>バイタル: 時間行サマリに4項目すべてが統合表示される
+    await page.getByTestId("nav-history").click();
+    await page.getByTestId("hist-sub-vital").click();
+    const row = page.getByTestId("vital-hour-row-15");
+    await expect(row).toContainText("34.0℃");
+    await expect(row).toContainText("68kg");
+    await expect(row).toContainText("119/75");
+    await expect(row).toContainText("77");
+    await expect(row).toContainText("2件");
+
+    // 展開すると個別の2レコードが残っている
+    await row.click();
+    await expect(page.getByTestId("vital-item")).toHaveCount(2);
+
+    // さらに体温だけ記録 → サマリの体温は最新値に更新、他項目は維持される
+    await page.getByTestId("nav-input").click();
+    await page.getByTestId("vital-temp-select").selectOption("36.5");
+    await page.getByTestId("vital-save").click();
+    await page.getByTestId("nav-history").click();
+    await page.getByTestId("hist-sub-vital").click();
+    await expect(row).toContainText("36.5℃");
+    await expect(row).not.toContainText("34.0℃");
+    await expect(row).toContainText("68kg");
+    await expect(row).toContainText("119/75");
+  });
+
   test("(h) 便・食事の複数回記録と1件だけ削除", async ({ page }) => {
     await openApp(page, undefined, "/?tab=input");
 

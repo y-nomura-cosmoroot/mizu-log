@@ -44,8 +44,10 @@ const partWrap: React.CSSProperties = {
   gap: 3,
 };
 
-/** バイタル1件の表示パーツ（🌡36.5℃・血圧・💓・体重） */
-function VitalParts({ v }: { v: VitalRecord }) {
+type VitalValues = Pick<VitalRecord, "temp" | "bpSys" | "bpDia" | "pulse" | "weight">;
+
+/** バイタル値の表示パーツ（🌡36.5℃・血圧・💓・体重）。個別レコードにも行サマリにも使う */
+function VitalParts({ v }: { v: VitalValues }) {
   return (
     <>
       {v.temp && (
@@ -143,7 +145,7 @@ export default function VitalHistory() {
                     alignItems: "baseline",
                   }}
                 >
-                  {g.latestVital && <VitalParts v={g.latestVital} />}
+                  {g.summary && <VitalParts v={g.summary} />}
                   {g.stoolCount > 0 && (
                     <span style={partWrap}>
                       <span style={{ fontSize: 13 }}>💩</span>

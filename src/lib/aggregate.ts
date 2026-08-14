@@ -100,10 +100,47 @@ export type VitalHistoryItem =
   | { type: "vital"; vital: VitalRecord }
   | { type: "flag"; flag: FlagRecord };
 
+/** 時間行サマリ: 項目ごとに「その時間の最新の非空値」をマージしたもの */
+export interface VitalHourSummary {
+  temp: string;
+  bpSys: string;
+  bpDia: string;
+  pulse: string;
+  weight: string;
+}
+
+/**
+ * バイタルは全項目任意のため、同じ時間に部分入力のレコードが複数あり得る
+ * （例: 1回目=体温+体重、2回目=血圧+脈拍）。最新1レコードだけをサマリにすると
+ * 先の記録の項目が消えるので、項目ごとに最新の非空値を採用する。
+ * 血圧は上下をペアで扱う（上が入っているレコードの上下を採用）。
+ */
+function mergeVitalSummary(hourVitals: VitalRecord[]): VitalHourSummary | null {
+  if (hourVitals.length === 0) return null;
+  const summary: VitalHourSummary = {
+    temp: "",
+    bpSys: "",
+    bpDia: "",
+    pulse: "",
+    weight: "",
+  };
+  // hourVitals は分昇順（同分は入力順）なので、後のレコードで上書きすれば最新値が残る
+  for (const v of hourVitals) {
+    if (v.temp) summary.temp = v.temp;
+    if (v.bpSys) {
+      summary.bpSys = v.bpSys;
+      summary.bpDia = v.bpDia;
+    }
+    if (v.pulse) summary.pulse = v.pulse;
+    if (v.weight) summary.weight = v.weight;
+  }
+  return summary;
+}
+
 export interface VitalHourGroup {
   hour: number;
-  /** 行サマリ用: その時間の最新バイタル（無ければnull） */
-  latestVital: VitalRecord | null;
+  /** 行サマリ（その時間にバイタルが無ければnull） */
+  summary: VitalHourSummary | null;
   stoolCount: number;
   mealCount: number;
   items: VitalHistoryItem[];
@@ -148,7 +185,7 @@ export function groupVitalEntriesByBandHour(
         ];
         return {
           hour: h,
-          latestVital: hourVitals.length ? hourVitals[hourVitals.length - 1] : null,
+          summary: mergeVitalSummary(hourVitals),
           stoolCount: hourFlags.filter((f) => f.kind === "stool").length,
           mealCount: hourFlags.filter((f) => f.kind === "meal").length,
           items,
