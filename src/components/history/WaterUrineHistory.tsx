@@ -8,8 +8,14 @@ import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import AccordionHourRow from "./AccordionHourRow";
 
-function subLabel(n: number): string {
-  return n ? `${n}ml` : "—";
+function SubLabel({ n }: { n: number }) {
+  if (!n) return <>—</>;
+  return (
+    <>
+      {n}
+      <span style={{ fontSize: 11 }}>ml</span>
+    </>
+  );
 }
 
 const kindChipLabel = { water: "飲水", urine: "尿量" } as const;
@@ -56,14 +62,14 @@ export default function WaterUrineHistory() {
                 data-testid={`band-w${b.band}`}
                 style={{ fontSize: 15, color: "#1c6dab" }}
               >
-                {subLabel(b.waterSum)}
+                <SubLabel n={b.waterSum} />
               </b>
               <span style={urineChip}>尿量</span>
               <b
                 data-testid={`band-u${b.band}`}
                 style={{ fontSize: 15, color: "#b0761a" }}
               >
-                {subLabel(b.urineSum)}
+                <SubLabel n={b.urineSum} />
               </b>
             </span>
           </div>
@@ -92,14 +98,14 @@ export default function WaterUrineHistory() {
                     data-testid={`hour-w-${g.hour}`}
                     style={{ fontSize: 15, color: "#1c6dab" }}
                   >
-                    {subLabel(g.waterSum)}
+                    <SubLabel n={g.waterSum} />
                   </b>
                   <span style={urineChip}>尿量</span>
                   <b
                     data-testid={`hour-u-${g.hour}`}
                     style={{ fontSize: 15, color: "#b0761a" }}
                   >
-                    {subLabel(g.urineSum)}
+                    <SubLabel n={g.urineSum} />
                   </b>
                 </span>
               }
@@ -169,11 +175,13 @@ export default function WaterUrineHistory() {
         <span style={{ fontSize: 12, color: "#46698a" }}>
           飲水{" "}
           <b data-testid="day-total-water" style={{ fontSize: 19, color: "#1c6dab" }}>
-            {waterTotal}ml
+            {waterTotal}
+            <span style={{ fontSize: 12 }}>ml</span>
           </b>{" "}
           ・ 尿{" "}
           <b data-testid="day-total-urine" style={{ fontSize: 19, color: "#b0761a" }}>
-            {urineTotal}ml
+            {urineTotal}
+            <span style={{ fontSize: 12 }}>ml</span>
           </b>
         </span>
       </div>

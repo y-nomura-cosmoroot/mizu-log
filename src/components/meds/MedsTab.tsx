@@ -25,7 +25,8 @@ export default function MedsTab() {
         <div style={{ fontSize: 14, fontWeight: 700 }}>
           きょうの分{" "}
           <span data-testid="meds-progress" style={{ color: "#2b8fd6" }}>
-            {done} / {timings.length} かんりょう
+            <b style={{ fontSize: 19, fontWeight: 900 }}>{done}</b> /{" "}
+            <b style={{ fontSize: 19, fontWeight: 900 }}>{timings.length}</b> かんりょう
           </span>
         </div>
         <button

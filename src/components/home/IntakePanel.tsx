@@ -141,13 +141,14 @@ export default function IntakePanel({
           fontWeight: 700,
           fontSize: 12.5,
           borderRadius: 999,
-          padding: "6px 14px",
+          padding: "8px 16px",
           boxShadow: p.pillShadow,
         }}
       >
         今日の合計{" "}
-        <b data-testid={`${kind}-day-total`} style={{ fontSize: 15 }}>
-          {dayTotalMl}ml
+        <b data-testid={`${kind}-day-total`} style={{ fontSize: 22, fontWeight: 900 }}>
+          {dayTotalMl}
+          <span style={{ fontSize: 14 }}>ml</span>
         </b>
       </span>
     </div>

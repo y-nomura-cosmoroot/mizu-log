@@ -179,7 +179,8 @@ export default function VitalsCard() {
           )}
           {lastT && (
             <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastT.recordedAt)}</b>時の記録{" "}
+              <b style={lastVal}>{hourOf(lastT.recordedAt)}</b>時の記録
+              <br />
               <b style={lastVal}>{lastT.temp}℃</b>
             </span>
           )}
@@ -227,7 +228,8 @@ export default function VitalsCard() {
           />
           {lastBP && (
             <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastBP.recordedAt)}</b>時の記録{" "}
+              <b style={lastVal}>{hourOf(lastBP.recordedAt)}</b>時の記録
+              <br />
               <b style={lastVal}>
                 {lastBP.bpSys}/{lastBP.bpDia || "—"}
               </b>
@@ -254,7 +256,8 @@ export default function VitalsCard() {
           </div>
           {lastP && (
             <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastP.recordedAt)}</b>時の記録{" "}
+              <b style={lastVal}>{hourOf(lastP.recordedAt)}</b>時の記録
+              <br />
               <b style={lastVal}>{lastP.pulse}回/分</b>
             </span>
           )}
@@ -282,7 +285,8 @@ export default function VitalsCard() {
           </div>
           {lastW && (
             <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastW.recordedAt)}</b>時の記録{" "}
+              <b style={lastVal}>{hourOf(lastW.recordedAt)}</b>時の記録
+              <br />
               <b style={lastVal}>{lastW.weight}kg</b>
             </span>
           )}

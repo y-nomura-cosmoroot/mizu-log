@@ -1,8 +1,8 @@
 "use client";
 
-import { medsForTiming } from "@/lib/meds";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
+import MedDoseList from "./MedDoseList";
 
 export default function TimingCheckRow({ timing }: { timing: string }) {
   const medicines = useAppStore((s) => s.medicines);
@@ -56,7 +56,7 @@ export default function TimingCheckRow({ timing }: { timing: string }) {
           </span>
         </div>
         <div style={{ fontSize: 12, color: "#7a8b98" }}>
-          {medsForTiming(medicines, timing)}
+          <MedDoseList medicines={medicines} timing={timing} numberSize={15} />
         </div>
       </div>
       {!checked && (

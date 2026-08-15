@@ -53,7 +53,10 @@ function VitalParts({ v }: { v: VitalValues }) {
       {v.temp && (
         <span style={partWrap}>
           <span style={{ fontSize: 13 }}>🌡</span>
-          <b style={partVal}>{v.temp}℃</b>
+          <b style={partVal}>
+            {v.temp}
+            <span style={{ fontSize: 11 }}>℃</span>
+          </b>
         </span>
       )}
       {v.bpSys && (
@@ -73,7 +76,10 @@ function VitalParts({ v }: { v: VitalValues }) {
       {v.weight && (
         <span style={partWrap}>
           <WeightIconSmall />
-          <b style={partVal}>{v.weight}kg</b>
+          <b style={partVal}>
+            {v.weight}
+            <span style={{ fontSize: 11 }}>kg</span>
+          </b>
         </span>
       )}
     </>
@@ -149,13 +155,19 @@ export default function VitalHistory() {
                   {g.stoolCount > 0 && (
                     <span style={partWrap}>
                       <span style={{ fontSize: 13 }}>💩</span>
-                      <b style={partVal}>{g.stoolCount}回</b>
+                      <b style={partVal}>
+                        {g.stoolCount}
+                        <span style={{ fontSize: 11 }}>回</span>
+                      </b>
                     </span>
                   )}
                   {g.mealCount > 0 && (
                     <span style={partWrap}>
                       <span style={{ fontSize: 13 }}>🍴</span>
-                      <b style={partVal}>{g.mealCount}回</b>
+                      <b style={partVal}>
+                        {g.mealCount}
+                        <span style={{ fontSize: 11 }}>回</span>
+                      </b>
                     </span>
                   )}
                 </span>

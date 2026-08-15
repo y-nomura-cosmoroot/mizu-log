@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 import { card } from "@/lib/styles";
-import {
-  groupMedChecksByBandHour,
-  medsForTiming,
-  uncheckedTimings,
-} from "@/lib/meds";
+import { groupMedChecksByBandHour, uncheckedTimings } from "@/lib/meds";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import AccordionHourRow from "./AccordionHourRow";
+import MedDoseList from "../meds/MedDoseList";
 
 export default function MedsHistory() {
   const timings = useAppStore((s) => s.timings);
@@ -78,7 +75,7 @@ export default function MedsHistory() {
                     {e.hour}:00
                   </span>
                   <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: "#24323d" }}>
-                    {medsForTiming(medicines, e.timing)}
+                    <MedDoseList medicines={medicines} timing={e.timing} />
                   </span>
                 </div>
               ))}
