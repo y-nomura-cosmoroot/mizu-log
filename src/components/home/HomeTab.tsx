@@ -11,6 +11,7 @@ import IntakePanel from "./IntakePanel";
 import MedsAlertBanner from "./MedsAlertBanner";
 import SubtotalBar from "./SubtotalBar";
 import TankBackground from "./TankBackground";
+import styles from "./HomeTab.module.css";
 
 export default function HomeTab() {
   const intakes = useAppStore((s) => s.intakes);
@@ -39,24 +40,15 @@ export default function HomeTab() {
 
   return (
     <>
-      <div style={{ padding: "2px 0 6px" }}>
-        <TimeSelector margin="0 16px" />
+      <div className={styles.selectorWrap}>
+        <TimeSelector inset />
       </div>
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "calc(100vh - 240px)",
-          overflow: "hidden",
-          background: "#f5fbff",
-        }}
-      >
+      <div className={styles.stage}>
         <TankBackground waterTotal={waterTotal} urineTotal={urineTotal} />
 
         {isToday && unchecked.length > 0 && <MedsAlertBanner unchecked={unchecked} />}
 
-        <div style={{ position: "relative", flex: 1, display: "flex", padding: "10px 0" }}>
+        <div className={styles.panels}>
           <IntakePanel
             kind="water"
             hourMl={sumForHour(intakes, "water", viewDate, selHour)}

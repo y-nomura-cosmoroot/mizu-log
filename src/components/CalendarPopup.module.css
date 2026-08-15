@@ -1,0 +1,145 @@
+.overlayZ {
+  z-index: 21;
+}
+
+.popup {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  width: 410px;
+  padding: 12px 10px;
+  z-index: 22;
+}
+
+.monthRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.monthBtn {
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-15);
+  border-radius: var(--r-10);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.monthLabel {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-700);
+}
+
+.dowGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: var(--fs-11);
+  color: var(--c-muted-500);
+  font-weight: var(--fw-bold);
+}
+
+.cellGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding-top: 4px;
+}
+
+/* 日付セル。状態は data-state="blank|selected|disabled|today|normal" で切替 */
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  border-radius: var(--r-10);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cell[data-state="blank"] {
+  border: none;
+  background: none;
+}
+
+.cell[data-state="selected"] {
+  border: none;
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
+  font-size: var(--fs-13);
+  padding: 6px 0 5px;
+  cursor: pointer;
+}
+
+.cell[data-state="disabled"] {
+  border: none;
+  background: none;
+  color: var(--c-disabled);
+  font-size: var(--fs-13);
+  padding: 6px 0 5px;
+}
+
+.cell[data-state="today"] {
+  border: 2px solid var(--c-primary-500);
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-13);
+  padding: 4px 0 5px;
+  cursor: pointer;
+}
+
+.cell[data-state="normal"] {
+  border: none;
+  background: var(--c-line-softer);
+  color: var(--c-ink);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+  padding: 6px 0 5px;
+  cursor: pointer;
+}
+
+/* 日付下の飲水/尿量合計。記録なしでも高さを保つため visibility で隠す */
+.cellTotal {
+  font-size: var(--fs-10);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cellTotal.isHidden {
+  visibility: hidden;
+}
+
+.totalW {
+  color: var(--c-primary-600);
+}
+
+.totalSlash {
+  color: var(--c-line-slash);
+}
+
+.totalU {
+  color: var(--c-urine-600);
+}
+
+/* 選択中セルは青背景になるため、合計の数字は白系にして視認性を保つ */
+.cell[data-state="selected"] .totalW {
+  color: #fff;
+}
+
+.cell[data-state="selected"] .totalSlash {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cell[data-state="selected"] .totalU {
+  color: rgba(255, 255, 255, 0.8);
+}

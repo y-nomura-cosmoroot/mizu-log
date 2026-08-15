@@ -1,0 +1,33 @@
+.wrap {
+  border-top: 1px solid var(--c-line-soft);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  cursor: pointer;
+  font-size: var(--fs-14);
+}
+
+.arrow {
+  font-size: var(--fs-11);
+  color: var(--c-primary-500);
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.arrow.isOpen {
+  transform: rotate(90deg);
+}
+
+.hourLabel {
+  width: 48px;
+  font-size: var(--fs-15);
+}
+
+.count {
+  font-size: var(--fs-11);
+  color: var(--c-muted-400);
+}

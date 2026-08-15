@@ -1,0 +1,8 @@
+.shell {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--c-primary-50) 0%, #e6f3fc 100%);
+  padding: 0 0 92px;
+  position: relative;
+}

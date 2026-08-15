@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 import { groupIntakesByBandHour, sumForDay } from "@/lib/aggregate";
-import { card, delBtn, editBtn, urineChip, waterChip } from "@/lib/styles";
 import { formatTime } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import AccordionHourRow from "./AccordionHourRow";
+import histStyles from "./history.module.css";
+import styles from "./WaterUrineHistory.module.css";
 
 function SubLabel({ n }: { n: number }) {
   if (!n) return <>—</>;
   return (
     <>
       {n}
-      <span style={{ fontSize: 11 }}>ml</span>
+      <span className={styles.subUnit}>ml</span>
     </>
   );
 }
@@ -34,65 +35,33 @@ export default function WaterUrineHistory() {
 
   return (
     <>
-      <div
-        style={{
-          ...card,
-          padding: "12px 16px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: 13,
-        }}
-      >
+      <div className={`card ${styles.totalCard}`}>
         <b>1日の合計</b>
-        <span style={{ fontSize: 12, color: "#46698a" }}>
+        <span className={styles.totalLine}>
           飲水{" "}
-          <b data-testid="day-total-water" style={{ fontSize: 19, color: "#1c6dab" }}>
+          <b data-testid="day-total-water" className={styles.totalWater}>
             {waterTotal}
-            <span style={{ fontSize: 12 }}>ml</span>
+            <span className={styles.totalUnit}>ml</span>
           </b>{" "}
           ・ 尿{" "}
-          <b data-testid="day-total-urine" style={{ fontSize: 19, color: "#b0761a" }}>
+          <b data-testid="day-total-urine" className={styles.totalUrine}>
             {urineTotal}
-            <span style={{ fontSize: 12 }}>ml</span>
+            <span className={styles.totalUnit}>ml</span>
           </b>
         </span>
       </div>
       {bands.map((b) => (
-        <div key={b.band} style={card}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "10px 16px",
-              background: "#f2f9fe",
-              fontSize: 13,
-            }}
-          >
+        <div key={b.band} className="card">
+          <div className={`${histStyles.bandHeader} ${histStyles.bandHeaderSplit}`}>
             <b>{b.label}</b>
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 12,
-                color: "#46698a",
-              }}
-            >
+            <span className={styles.subtotalRow}>
               小計
-              <span style={waterChip}>飲水</span>
-              <b
-                data-testid={`band-w${b.band}`}
-                style={{ fontSize: 15, color: "#1c6dab" }}
-              >
+              <span className="badge-water">飲水</span>
+              <b data-testid={`band-w${b.band}`} className={styles.sumWater}>
                 <SubLabel n={b.waterSum} />
               </b>
-              <span style={urineChip}>尿量</span>
-              <b
-                data-testid={`band-u${b.band}`}
-                style={{ fontSize: 15, color: "#b0761a" }}
-              >
+              <span className="badge-urine">尿量</span>
+              <b data-testid={`band-u${b.band}`} className={styles.sumUrine}>
                 <SubLabel n={b.urineSum} />
               </b>
             </span>
@@ -108,27 +77,13 @@ export default function WaterUrineHistory() {
                 setOpenHours((prev) => ({ ...prev, [g.hour]: !prev[g.hour] }))
               }
               headerContent={
-                <span
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "4px 8px",
-                    alignItems: "center",
-                  }}
-                >
-                  <span style={waterChip}>飲水</span>
-                  <b
-                    data-testid={`hour-w-${g.hour}`}
-                    style={{ fontSize: 15, color: "#1c6dab" }}
-                  >
+                <span className={styles.hourSummary}>
+                  <span className="badge-water">飲水</span>
+                  <b data-testid={`hour-w-${g.hour}`} className={styles.sumWater}>
                     <SubLabel n={g.waterSum} />
                   </b>
-                  <span style={urineChip}>尿量</span>
-                  <b
-                    data-testid={`hour-u-${g.hour}`}
-                    style={{ fontSize: 15, color: "#b0761a" }}
-                  >
+                  <span className="badge-urine">尿量</span>
+                  <b data-testid={`hour-u-${g.hour}`} className={styles.sumUrine}>
                     <SubLabel n={g.urineSum} />
                   </b>
                 </span>
@@ -138,35 +93,20 @@ export default function WaterUrineHistory() {
                 <div
                   key={it.id}
                   data-testid="intake-item"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "8px 16px 8px 34px",
-                    borderTop: "1px solid #f4f9fd",
-                    background: "#fbfdff",
-                    fontSize: 14,
-                  }}
+                  className={`${histStyles.itemRow} ${styles.row}`}
                 >
-                  <span style={it.kind === "water" ? waterChip : urineChip}>
+                  <span className={it.kind === "water" ? "badge-water" : "badge-urine"}>
                     {kindChipLabel[it.kind]}
                   </span>
-                  <span style={{ color: "#7a8b98", fontSize: 13, width: 44 }}>
-                    {formatTime(it.recordedAt)}
-                  </span>
-                  <span
-                    style={{ flex: 1, fontWeight: 900, fontSize: 16, color: "#155a8f" }}
-                  >
-                    {it.ml}{" "}
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "#7a8b98" }}>
-                      ml
-                    </span>
+                  <span className={styles.time}>{formatTime(it.recordedAt)}</span>
+                  <span className={styles.ml}>
+                    {it.ml} <span className={styles.mlUnit}>ml</span>
                   </span>
                   <button
                     onClick={() =>
                       openSheet({ type: "ml", id: it.id, kind: it.kind, ml: it.ml })
                     }
-                    style={editBtn}
+                    className="btn-edit"
                   >
                     なおす
                   </button>
@@ -175,7 +115,7 @@ export default function WaterUrineHistory() {
                       deleteIntake(it.id);
                       showToast("けしました");
                     }}
-                    style={delBtn}
+                    className="btn-del"
                   >
                     けす
                   </button>

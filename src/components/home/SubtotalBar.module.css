@@ -1,0 +1,27 @@
+.bar {
+  position: relative;
+  margin: 0 16px 4px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: var(--r-18);
+  padding: 10px 16px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-11-5);
+  text-align: center;
+}
+
+.cell {
+  color: var(--c-ink-sub);
+}
+
+.w {
+  font-size: var(--fs-13);
+  color: var(--c-primary-700);
+}
+
+.u {
+  color: var(--c-urine-600);
+}

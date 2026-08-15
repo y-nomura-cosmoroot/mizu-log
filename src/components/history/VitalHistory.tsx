@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { groupVitalEntriesByBandHour } from "@/lib/aggregate";
-import { card, delBtn, editBtn } from "@/lib/styles";
 import { formatTime } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { VitalRecord } from "@/types/records";
 import AccordionHourRow from "./AccordionHourRow";
+import histStyles from "./history.module.css";
+import styles from "./VitalHistory.module.css";
 
 function BpIconSmall() {
   return (
@@ -37,13 +38,6 @@ function WeightIconSmall() {
   );
 }
 
-const partVal: React.CSSProperties = { fontSize: 15, color: "#155a8f", fontWeight: 700 };
-const partWrap: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 3,
-};
-
 type VitalValues = Pick<VitalRecord, "temp" | "bpSys" | "bpDia" | "pulse" | "weight">;
 
 /** バイタル値の表示パーツ（🌡36.5℃・血圧・💓・体重）。個別レコードにも行サマリにも使う */
@@ -51,34 +45,34 @@ function VitalParts({ v }: { v: VitalValues }) {
   return (
     <>
       {v.temp && (
-        <span style={partWrap}>
-          <span style={{ fontSize: 13 }}>🌡</span>
-          <b style={partVal}>
+        <span className={styles.partWrap}>
+          <span className={styles.partIcon}>🌡</span>
+          <b className={styles.partVal}>
             {v.temp}
-            <span style={{ fontSize: 11 }}>℃</span>
+            <span className={styles.partUnit}>℃</span>
           </b>
         </span>
       )}
       {v.bpSys && (
-        <span style={partWrap}>
+        <span className={styles.partWrap}>
           <BpIconSmall />
-          <b style={partVal}>
+          <b className={styles.partVal}>
             {v.bpSys}/{v.bpDia || "—"}
           </b>
         </span>
       )}
       {v.pulse && (
-        <span style={partWrap}>
-          <span style={{ fontSize: 13 }}>💓</span>
-          <b style={partVal}>{v.pulse}</b>
+        <span className={styles.partWrap}>
+          <span className={styles.partIcon}>💓</span>
+          <b className={styles.partVal}>{v.pulse}</b>
         </span>
       )}
       {v.weight && (
-        <span style={partWrap}>
+        <span className={styles.partWrap}>
           <WeightIconSmall />
-          <b style={partVal}>
+          <b className={styles.partVal}>
             {v.weight}
-            <span style={{ fontSize: 11 }}>kg</span>
+            <span className={styles.partUnit}>kg</span>
           </b>
         </span>
       )}
@@ -101,10 +95,7 @@ export default function VitalHistory() {
 
   if (totalEmpty) {
     return (
-      <div
-        data-testid="vital-hist-empty"
-        style={{ textAlign: "center", color: "#7a8b98", fontSize: 13, padding: "24px 0" }}
-      >
+      <div data-testid="vital-hist-empty" className={styles.histEmpty}>
         この日のバイタルの記録はまだありません
       </div>
     );
@@ -113,22 +104,11 @@ export default function VitalHistory() {
   return (
     <>
       {bands.map((b) => (
-        <div key={b.band} style={card}>
-          <div style={{ padding: "10px 16px", background: "#f2f9fe", fontSize: 13 }}>
+        <div key={b.band} className="card">
+          <div className={histStyles.bandHeader}>
             <b>{b.label}</b>
           </div>
-          {b.empty && (
-            <div
-              style={{
-                padding: "10px 16px",
-                fontSize: 12,
-                color: "#9db0bd",
-                borderTop: "1px solid #eef4f9",
-              }}
-            >
-              記録なし
-            </div>
-          )}
+          {b.empty && <div className={histStyles.emptyNote}>記録なし</div>}
           {b.hours.map((g) => (
             <AccordionHourRow
               key={g.hour}
@@ -140,33 +120,23 @@ export default function VitalHistory() {
                 setOpenHours((prev) => ({ ...prev, [g.hour]: !prev[g.hour] }))
               }
               headerContent={
-                <span
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "2px 10px",
-                    fontSize: 12,
-                    color: "#46698a",
-                    alignItems: "baseline",
-                  }}
-                >
+                <span className={styles.hourSummary}>
                   {g.summary && <VitalParts v={g.summary} />}
                   {g.stoolCount > 0 && (
-                    <span style={partWrap}>
-                      <span style={{ fontSize: 13 }}>💩</span>
-                      <b style={partVal}>
+                    <span className={styles.partWrap}>
+                      <span className={styles.partIcon}>💩</span>
+                      <b className={styles.partVal}>
                         {g.stoolCount}
-                        <span style={{ fontSize: 11 }}>回</span>
+                        <span className={styles.partUnit}>回</span>
                       </b>
                     </span>
                   )}
                   {g.mealCount > 0 && (
-                    <span style={partWrap}>
-                      <span style={{ fontSize: 13 }}>🍴</span>
-                      <b style={partVal}>
+                    <span className={styles.partWrap}>
+                      <span className={styles.partIcon}>🍴</span>
+                      <b className={styles.partVal}>
                         {g.mealCount}
-                        <span style={{ fontSize: 11 }}>回</span>
+                        <span className={styles.partUnit}>回</span>
                       </b>
                     </span>
                   )}
@@ -177,38 +147,22 @@ export default function VitalHistory() {
                 <div
                   key={it.type === "vital" ? it.vital.id : it.flag.id}
                   data-testid={it.type === "vital" ? "vital-item" : "flag-item"}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "8px 16px 8px 34px",
-                    borderTop: "1px solid #f4f9fd",
-                    background: "#fbfdff",
-                    fontSize: 13,
-                  }}
+                  className={`${histStyles.itemRow} ${styles.row}`}
                 >
-                  <span style={{ width: 44, color: "#7a8b98", fontSize: 12 }}>
+                  <span className={styles.time}>
                     {formatTime(
                       it.type === "vital" ? it.vital.recordedAt : it.flag.recordedAt
                     )}
                   </span>
-                  <span
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "2px 10px",
-                      alignItems: "center",
-                    }}
-                  >
+                  <span className={styles.itemParts}>
                     {it.type === "vital" ? (
                       <VitalParts v={it.vital} />
                     ) : (
-                      <span style={partWrap}>
-                        <span style={{ fontSize: 13 }}>
+                      <span className={styles.partWrap}>
+                        <span className={styles.partIcon}>
                           {it.flag.kind === "stool" ? "💩" : "🍴"}
                         </span>
-                        <b style={partVal}>
+                        <b className={styles.partVal}>
                           {it.flag.kind === "stool" ? "便 あり" : "食事 あり"}
                         </b>
                       </span>
@@ -227,7 +181,7 @@ export default function VitalHistory() {
                           weight: it.vital.weight,
                         })
                       }
-                      style={editBtn}
+                      className="btn-edit"
                     >
                       なおす
                     </button>
@@ -241,7 +195,7 @@ export default function VitalHistory() {
                       }
                       showToast("けしました");
                     }}
-                    style={delBtn}
+                    className="btn-del"
                   >
                     けす
                   </button>

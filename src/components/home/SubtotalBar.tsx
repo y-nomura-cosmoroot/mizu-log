@@ -1,6 +1,7 @@
 "use client";
 
 import { BAND_DEFS } from "@/lib/constants";
+import styles from "./SubtotalBar.module.css";
 
 function fmtN(n: number): string {
   return n ? String(n) : "—";
@@ -19,47 +20,29 @@ export default function SubtotalBar({
   urineTotal: number;
 }) {
   return (
-    <div
-      style={{
-        position: "relative",
-        margin: "0 16px 4px",
-        background: "rgba(255,255,255,.92)",
-        borderRadius: 18,
-        padding: "10px 16px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 11.5,
-          textAlign: "center",
-        }}
-      >
+    <div className={styles.bar}>
+      <div className={styles.row}>
         {BAND_DEFS.map(({ band, label }) => (
-          <span key={band} style={{ color: "#46698a" }}>
+          <span key={band} className={styles.cell}>
             {label}
             <br />
-            <b
-              data-testid={`subtotal-w${band}`}
-              style={{ fontSize: 13, color: "#155a8f" }}
-            >
+            <b data-testid={`subtotal-w${band}`} className={styles.w}>
               {fmtN(waterBands[band - 1])}
             </b>{" "}
             /{" "}
-            <b data-testid={`subtotal-u${band}`} style={{ color: "#b0761a" }}>
+            <b data-testid={`subtotal-u${band}`} className={styles.u}>
               {fmtN(urineBands[band - 1])}
             </b>
           </span>
         ))}
-        <span style={{ color: "#46698a" }}>
+        <span className={styles.cell}>
           合計
           <br />
-          <b data-testid="subtotal-wt" style={{ fontSize: 13, color: "#155a8f" }}>
+          <b data-testid="subtotal-wt" className={styles.w}>
             {fmtN(waterTotal)}
           </b>{" "}
           /{" "}
-          <b data-testid="subtotal-ut" style={{ color: "#b0761a" }}>
+          <b data-testid="subtotal-ut" className={styles.u}>
             {fmtN(urineTotal)}
           </b>
         </span>

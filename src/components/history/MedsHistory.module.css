@@ -1,0 +1,78 @@
+.hourTimings {
+  flex: 1;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--c-primary-700);
+}
+
+/* 個別記録行のおくすり固有部分（共通は history.module.css の itemRow） */
+.row {
+  gap: 10px;
+  font-size: var(--fs-13);
+}
+
+.timingCol {
+  width: 78px;
+  color: var(--c-muted-500);
+  font-size: var(--fs-12);
+}
+
+.hourCol {
+  width: 48px;
+  color: var(--c-muted-500);
+  font-size: var(--fs-12);
+}
+
+.medsCol {
+  flex: 1;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  color: var(--c-ink);
+}
+
+/* 飲み忘れ判定カード。ok/ng は既存の data-ok 属性で切り替える */
+.resultCard {
+  border-radius: var(--r-16);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resultCard[data-ok="true"] {
+  background: var(--c-ok-50);
+  border: 2px solid var(--c-ok-300);
+  box-shadow: var(--sh-ok);
+}
+
+.resultCard[data-ok="false"] {
+  background: var(--c-danger-100);
+  border: 2px solid var(--c-danger-300);
+  box-shadow: var(--sh-alert);
+}
+
+.resultIcon {
+  font-size: var(--fs-22);
+}
+
+.resultBody {
+  flex: 1;
+}
+
+.resultTitle {
+  font-size: var(--fs-17);
+  font-weight: var(--fw-black);
+}
+
+.resultCard[data-ok="true"] .resultTitle {
+  color: var(--c-ok-700);
+}
+
+.resultCard[data-ok="false"] .resultTitle {
+  color: var(--c-danger-600);
+}
+
+.resultSub {
+  font-size: var(--fs-12);
+  color: var(--c-muted-600);
+}

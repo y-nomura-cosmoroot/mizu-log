@@ -1,0 +1,117 @@
+/* 水位（高さ%）は日合計由来の計算値なので --tank-h をインラインで注入する。
+   タンク・波の色はこのファイル/コンポーネント限定のワンオフ */
+.tank {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: var(--tank-h);
+  transition: height 0.6s ease;
+  /* 波ストリップはタンクより幅広なので、隣のタンクへはみ出さないよう切る */
+  overflow: hidden;
+}
+
+.tankWater {
+  left: 0;
+  background: linear-gradient(180deg, #a5d8f5, #4aa0dc);
+}
+
+.tankUrine {
+  right: 0;
+  background: linear-gradient(180deg, #f4cf83, #e0a53f);
+}
+
+/* 水面: 不均一なうねりのSVG帯を横に流し、さらにラッパーを上下ボブさせる。
+   横流し・ボブ・前面/背面・左右タンクの周期を互いに割り切れない値にして
+   「同じ動きの繰り返し」に見えないようにする（規則的すぎるとの指摘対応）。
+   旧実装（回転する角丸ブロック）は辺の直線が水面に出るため廃止 */
+.waveWrapFront {
+  position: absolute;
+  left: 0;
+  top: -7px;
+  line-height: 0;
+}
+
+.waveWrapBack {
+  position: absolute;
+  left: 0;
+  top: -8px;
+  line-height: 0;
+}
+
+.waveFront,
+.waveBack {
+  display: block;
+}
+
+/* 横流し（タンクごとに速度・向きを変える） */
+.tankWater .waveFront {
+  animation: wavemove 7.3s linear infinite;
+}
+
+.tankWater .waveBack {
+  animation: wavemove-back 12.7s linear infinite;
+}
+
+.tankUrine .waveFront {
+  animation: wavemove 8.1s linear infinite reverse;
+}
+
+.tankUrine .waveBack {
+  animation: wavemove-back 14.3s linear infinite reverse;
+}
+
+/* 上下ボブ（横流しと非同期な周期で重ねる） */
+.tankWater .waveWrapFront {
+  animation: wavebob 3.7s ease-in-out infinite alternate;
+}
+
+.tankWater .waveWrapBack {
+  animation: wavebob 5.3s ease-in-out infinite alternate;
+}
+
+.tankUrine .waveWrapFront {
+  animation: wavebob 4.3s ease-in-out infinite alternate;
+}
+
+.tankUrine .waveWrapBack {
+  animation: wavebob 6.1s ease-in-out infinite alternate;
+}
+
+.divider {
+  position: absolute;
+  left: 50%;
+  top: 60px;
+  bottom: 0;
+  border-left: 1.5px dashed rgba(21, 90, 143, 0.25);
+}
+
+/* keyframes は参照するモジュール内に置く（グローバルだと名前が一致しない）。
+   ちょうど1周期ぶん平行移動して先頭へ戻る。帯は移動量より2周期以上広いので
+   タンク幅(約215px)が途切れず、継ぎ目も出ない */
+@keyframes wavemove {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-240px);
+  }
+}
+
+@keyframes wavemove-back {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-320px);
+  }
+}
+
+/* 下方向のみに揺らす（上に動かすと波の頂点がタンク上端を越えて水面が直線になる） */
+@keyframes wavebob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(2px);
+  }
+}

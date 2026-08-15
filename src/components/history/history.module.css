@@ -1,0 +1,32 @@
+/* 履歴3サブタブ（水分/尿・バイタル・おくすり）で共有するパーツ */
+
+/* 帯（8時間区切り）の見出し行 */
+.bandHeader {
+  padding: 10px 16px;
+  background: var(--c-surface-band);
+  font-size: var(--fs-13);
+}
+
+/* 左右に割り付ける帯見出し（水分/尿の小計表示用） */
+.bandHeaderSplit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 展開行の中の個別記録行。gap / fontSize は各サブタブ側で指定 */
+.itemRow {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px 8px 34px;
+  border-top: 1px solid var(--c-line-softer);
+  background: var(--c-surface-row);
+}
+
+/* 「記録なし」の帯内表示 */
+.emptyNote {
+  padding: 10px 16px;
+  font-size: var(--fs-12);
+  color: var(--c-muted-400);
+  border-top: 1px solid var(--c-line-soft);
+}

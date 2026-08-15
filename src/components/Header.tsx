@@ -1,22 +1,9 @@
 "use client";
 
-import { chipOff, chipOn } from "@/lib/styles";
 import { formatDateLabel } from "@/lib/time";
 import { useUiStore, type HistSub } from "@/stores/useUiStore";
 import CalendarPopup from "./CalendarPopup";
-
-const navBtn: React.CSSProperties = {
-  width: 34,
-  height: 34,
-  border: "none",
-  borderRadius: "50%",
-  background: "#fff",
-  color: "#2b8fd6",
-  fontSize: 16,
-  fontWeight: 700,
-  boxShadow: "0 1px 4px rgba(43,113,166,.15)",
-  cursor: "pointer",
-};
+import styles from "./Header.module.css";
 
 const SUB_TABS: ReadonlyArray<{ key: HistSub; label: string }> = [
   { key: "water", label: "飲水量/尿量" },
@@ -35,82 +22,45 @@ export default function Header() {
   const setCalOpen = useUiStore((s) => s.setCalOpen);
 
   return (
-    <div
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 25,
-        background: "#f5fbff",
-        boxShadow: "0 2px 10px rgba(43,113,166,.08)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "16px 18px 4px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div
-            style={{
-              width: 16,
-              height: 16,
-              background: "linear-gradient(160deg,#6cc0ef,#2b8fd6)",
-              borderRadius: "50% 50% 50% 0",
-              transform: "rotate(-45deg)",
-            }}
-          />
-          <span
-            style={{
-              fontWeight: 900,
-              fontSize: 17,
-              color: "#1c6dab",
-              letterSpacing: ".02em",
-            }}
-          >
-            みずログ
-          </span>
+    <div className={styles.header}>
+      <div className={styles.brandRow}>
+        <div className={styles.brand}>
+          <div className={styles.logoMark} />
+          <span className={styles.brandName}>みずログ</span>
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 14,
-          padding: "6px 18px 10px",
-        }}
-      >
-        <button data-testid="prev-day" onClick={goPrevDay} style={navBtn}>
+      <div className={styles.dateRow}>
+        <button data-testid="prev-day" onClick={goPrevDay} className={styles.navBtn}>
           ‹
         </button>
-        <div style={{ position: "relative", textAlign: "center", minWidth: 150, zIndex: 20 }}>
+        <div className={styles.dateWrap}>
           <div
             data-testid="date-label"
             onClick={() => setCalOpen(!calOpen)}
-            style={{ fontSize: 18, fontWeight: 700, cursor: "pointer" }}
+            className={styles.dateLabel}
           >
-            {formatDateLabel(viewDate)}{" "}
-            <span style={{ fontSize: 11, color: "#2b8fd6" }}>▾</span>
+            {formatDateLabel(viewDate)} <span className={styles.caret}>▾</span>
           </div>
           {calOpen && <CalendarPopup />}
         </div>
-        <button data-testid="next-day" onClick={() => goNextDay(new Date())} style={navBtn}>
+        <button
+          data-testid="next-day"
+          onClick={() => goNextDay(new Date())}
+          className={styles.navBtn}
+        >
           ›
         </button>
       </div>
 
       {tab === "history" && (
-        <div style={{ display: "flex", gap: 6, padding: "0 16px 10px" }}>
+        <div className={styles.subTabs}>
           {SUB_TABS.map((t) => (
             <button
               key={t.key}
               data-testid={`hist-sub-${t.key}`}
               onClick={() => setHistSub(t.key)}
-              style={histSub === t.key ? chipOn : chipOff}
+              className={`chip ${histSub === t.key ? "chip--on" : "chip--off"}`}
             >
               {t.label}
             </button>

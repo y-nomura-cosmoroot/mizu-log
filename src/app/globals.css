@@ -1,16 +1,125 @@
+/* ============================================================
+   デザイントークン
+   命名: --c-* 色 / --fs-* fontSize / --fw-* fontWeight /
+         --r-* borderRadius / --sh-* boxShadow
+   方針: 完全一致移行（値の統合・丸めはしない）。近似値は別トークンで
+   並記し用途コメントを付ける（統合は別タスク）。
+   1ファイル閉じのワンオフ色・グラデ・SVG色はトークン化せず
+   各モジュール/TSのリテラルのまま。
+   ============================================================ */
+:root {
+  /* 青（プライマリ） */
+  --c-primary-700: #155a8f; /* 数値強調・濃見出し */
+  --c-primary-600: #1c6dab; /* ラベル・ソフトボタン文字 */
+  --c-primary-500: #2b8fd6; /* 塗りボタン・選択・リンク */
+  --c-primary-100: #eef6fc; /* ソフトボタン背景 */
+  --c-primary-50: #f5fbff; /* ヘッダ面・トグル背景 */
+  --c-water-100: #dceefb; /* 飲水チップ背景 */
+  --c-app-bg: #dceefb; /* body背景。water-100と同値だが別トークン（統合は後タスク） */
+
+  /* 尿（アンバー） */
+  --c-urine-700: #a06a12;
+  --c-urine-600: #b0761a;
+  --c-urine-500: #d99422;
+  --c-urine-100: #fdf1dc;
+
+  /* 危険（赤）近似2色は統合しない（完全一致方針） */
+  --c-danger-600: #c2453a; /* 飲み忘れアラート文字 */
+  --c-danger-500: #c25454; /* けすボタン文字 */
+  --c-danger-300: #e58b83; /* アラート枠 */
+  --c-danger-100: #fdeaea; /* 赤ソフト背景 */
+
+  /* OK（緑） */
+  --c-ok-700: #2e7d4f;
+  --c-ok-300: #7cc79a;
+  --c-ok-100: #dff0e3;
+  --c-ok-50: #e6f7ec;
+
+  /* テキスト */
+  --c-ink: #24323d;
+  --c-ink-sub: #46698a;
+  --c-muted-600: #5d7488;
+  --c-muted-500: #7a8b98;
+  --c-muted-400: #9db0bd;
+
+  /* 罫線・枠 */
+  --c-line-card: #a8cfe8;
+  --c-line-input: #d5e7f4;
+  --c-line-soft: #eef4f9;
+  --c-line-softer: #f4f9fd;
+  --c-line-nav: #e3eef6;
+  --c-line-hair: #b9cdda;
+  --c-line-slash: #b7c6d1;
+  --c-disabled: #c8d4dd;
+
+  /* 面 */
+  --c-surface-band: #f2f9fe;
+  --c-surface-row: #fbfdff;
+  --c-surface-input: #fafdff;
+  --c-surface-dim: #f4f7fa;
+  --c-surface-soft: #f7fbfe;
+
+  /* fontSize（値ベース。.5系もそのまま） */
+  --fs-10: 10px;
+  --fs-10-5: 10.5px;
+  --fs-11: 11px;
+  --fs-11-5: 11.5px;
+  --fs-12: 12px;
+  --fs-12-5: 12.5px;
+  --fs-13: 13px;
+  --fs-13-5: 13.5px;
+  --fs-14: 14px;
+  --fs-15: 15px;
+  --fs-16: 16px;
+  --fs-17: 17px;
+  --fs-18: 18px;
+  --fs-19: 19px;
+  --fs-20: 20px;
+  --fs-22: 22px;
+  --fs-30: 30px;
+  --fs-38: 38px;
+
+  /* fontWeight */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+  --fw-black: 900;
+
+  /* borderRadius */
+  --r-8: 8px;
+  --r-10: 10px;
+  --r-12: 12px;
+  --r-14: 14px;
+  --r-16: 16px;
+  --r-18: 18px;
+  --r-20: 20px;
+  --r-pill: 999px;
+  --r-full: 50%;
+
+  /* boxShadow */
+  --sh-card: 0 2px 10px rgba(43, 113, 166, 0.08);
+  --sh-row: 0 2px 10px rgba(43, 113, 166, 0.06); /* cardの.08と近似。統合は後タスク */
+  --sh-btn-s: 0 1px 4px rgba(43, 113, 166, 0.15);
+  --sh-float: 0 4px 14px rgba(21, 90, 143, 0.14);
+  --sh-pop: 0 12px 34px rgba(21, 50, 75, 0.3);
+  --sh-alert: 0 4px 14px rgba(194, 69, 58, 0.18);
+  --sh-ok: 0 4px 14px rgba(46, 125, 79, 0.16);
+  --sh-sheet: 0 -6px 30px rgba(20, 50, 70, 0.2);
+}
+
 body {
   margin: 0;
-  background: #dceefb;
-  color: #24323d;
+  background: var(--c-app-bg);
+  color: var(--c-ink);
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: #2b8fd6;
+  color: var(--c-primary-500);
 }
 
 a:hover {
-  color: #1c6dab;
+  color: var(--c-primary-600);
 }
 
 input,
@@ -19,70 +128,114 @@ button {
   font-family: inherit;
 }
 
-@keyframes spinwave {
-  from {
-    transform: rotate(0deg);
+/* ============================================================
+   共通部品クラス
+   採用基準: 完全同一レシピが2ファイル以上、または旧 lib/styles.ts 由来。
+   @layer 内に置くことで、レイヤ外（CSS Modules）の宣言が specificity・
+   読み込み順に関係なく常に勝つ → `input ${s.xxx}` の差分上書きが安全。
+   ============================================================ */
+@layer app-components {
+  /* 白カード（枠あり。背景と同化しないよう境界線をはっきり出す） */
+  .card {
+    background: #fff;
+    border: 1.5px solid var(--c-line-card);
+    border-radius: var(--r-16);
+    box-shadow: var(--sh-card);
+    overflow: hidden;
   }
-  to {
-    transform: rotate(360deg);
+
+  /* 白カード（枠なし・大きめ角丸）。paddingは使用側モジュールで指定 */
+  .panel {
+    background: #fff;
+    border-radius: var(--r-20);
+    box-shadow: var(--sh-card);
+  }
+
+  /* 入力欄 */
+  .input {
+    border: 1.5px solid var(--c-line-input);
+    border-radius: var(--r-10);
+    padding: 8px 10px;
+    font-size: var(--fs-15);
+    background: var(--c-surface-input);
+    color: var(--c-ink);
+  }
+
+  /* 「なおす」ボタン */
+  .btn-edit {
+    border: none;
+    background: var(--c-primary-100);
+    color: var(--c-primary-600);
+    border-radius: var(--r-10);
+    padding: 6px 12px;
+    font-size: var(--fs-12);
+    font-weight: var(--fw-bold);
+    cursor: pointer;
+  }
+
+  /* 「けす」ボタン */
+  .btn-del {
+    border: none;
+    background: var(--c-danger-100);
+    color: var(--c-danger-500);
+    border-radius: var(--r-10);
+    padding: 6px 12px;
+    font-size: var(--fs-12);
+    font-weight: var(--fw-bold);
+    cursor: pointer;
+  }
+
+  /* 選択チップ（履歴サブタブ等） */
+  .chip {
+    border: none;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-13);
+    border-radius: var(--r-pill);
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  .chip--on {
+    background: var(--c-primary-500);
+    color: #fff;
+  }
+  .chip--off {
+    background: var(--c-primary-100);
+    color: var(--c-primary-600);
+  }
+
+  /* 履歴の種別チップ */
+  .badge-water {
+    background: var(--c-water-100);
+    color: var(--c-primary-600);
+    font-weight: var(--fw-black);
+    font-size: var(--fs-11);
+    border-radius: var(--r-pill);
+    padding: 3px 10px;
+  }
+  .badge-urine {
+    background: var(--c-urine-100);
+    color: var(--c-urine-600);
+    font-weight: var(--fw-black);
+    font-size: var(--fs-11);
+    border-radius: var(--r-pill);
+    padding: 3px 10px;
+  }
+
+  /* ポップアップ背後の透明オーバーレイ。z-indexは使用側で指定 */
+  .overlay {
+    position: fixed;
+    inset: 0;
+  }
+
+  /* ドロップダウン/カレンダー等のポップアップ面。位置・幅は使用側で指定 */
+  .popover {
+    background: #fff;
+    border-radius: var(--r-18);
+    box-shadow: var(--sh-pop);
   }
 }
 
-@keyframes toastin {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 10px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-@keyframes rowpop {
-  0% {
-    transform: translateY(8px) scale(0.97);
-    box-shadow: 0 0 0 3px rgba(43, 143, 214, 0.4);
-  }
-  60% {
-    transform: none;
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(43, 143, 214, 0);
-  }
-}
-
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  30% {
-    transform: scale(1.25);
-  }
-  60% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes dizzy-sway {
-  0%,
-  100% {
-    transform: rotate(-12deg);
-  }
-  50% {
-    transform: rotate(12deg);
-  }
-}
-
-@keyframes vein-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-}
+/* @keyframes は使用側の *.module.css に置く。
+   CSS Modules は animation 名をモジュールスコープでハッシュ化するため、
+   ここ（グローバル）に keyframes を置いてモジュールから参照すると
+   名前が一致せずアニメーションが動かない（2026-08 に実際に起きた事故）。 */

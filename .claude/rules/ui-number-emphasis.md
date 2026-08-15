@@ -1,23 +1,35 @@
 ---
 paths:
   - "src/components/**/*.tsx"
+  - "src/components/**/*.module.css"
 ---
 
 # 数値の強調と単位の扱い
 
 合計・小計・件数・完了数・用量など「数値を目立たせたい」表示では、**数値本体だけ**を大きく/太くし、
 単位（`ml` `℃` `kg` `回` `回/分` `錠` 等）は数値と同じ要素の中に入れ子の
-`<span style={{ fontSize: 小さいサイズ }}>単位</span>` として書く。
+`<span className={...単位用の小さいクラス}>単位</span>` として書く。
 
 ```tsx
-<b style={{ fontSize: 22, fontWeight: 900 }}>
+<b data-testid="water-day-total" className={styles.totalNum}>
   {dayTotalMl}
-  <span style={{ fontSize: 14 }}>ml</span>
+  <span className={styles.totalUnit}>ml</span>
 </b>
 ```
 
-- 単位側の `fontWeight` は明示的にリセットしない（親の `<b>`/太字から継承させる）。
-  サイズだけ落とせば「単位」として十分読める（既存の `この時間の飲水量` 表示のパターンに倣う）
+```css
+.totalNum {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-black);
+}
+
+.totalUnit {
+  font-size: var(--fs-14);
+}
+```
+
+- 単位側の `font-weight` は明示的にリセットしない（親の `<b>`/太字クラスから継承させる）。
+  サイズだけ落とせば「単位」として十分読める（`IntakePanel` の `この時間の飲水量` 表示のパターンに倣う）
 - `{数値}単位` を1つの文字列として結合して返す関数（例: `` `${n}ml` ``）は書かない。
   数値と単位を別要素に分けられず、後から数値だけ強調できなくなる。単位付き文字列を返す既存のヘルパーは
   JSXを返すコンポーネントに置き換える
@@ -34,3 +46,4 @@ paths:
 [MedsTab.tsx](../../src/components/meds/MedsTab.tsx)（きょうの分の完了数）、
 [MedDoseList.tsx](../../src/components/meds/MedDoseList.tsx)（薬の用量）の計5箇所に残っていたため
 横展開で修正した。新しく数値+単位を表示するコンポーネントを書くときは最初からこのパターンに従うこと。
+（コード例はインラインstyle時代のものからCSS Modules移行後の形に更新済み）

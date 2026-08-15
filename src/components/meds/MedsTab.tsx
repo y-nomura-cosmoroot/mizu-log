@@ -6,6 +6,7 @@ import TimeSelector from "../TimeSelector";
 import MedicineMasterCard from "./MedicineMasterCard";
 import TimingCheckRow from "./TimingCheckRow";
 import TimingMasterCard from "./TimingMasterCard";
+import styles from "./MedsTab.module.css";
 
 export default function MedsTab() {
   const timings = useAppStore((s) => s.timings);
@@ -18,31 +19,21 @@ export default function MedsTab() {
   const done = timings.filter((t) => checks[t] != null).length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "2px 16px" }}>
+    <div className={styles.tab}>
       <TimeSelector />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ fontSize: 14, fontWeight: 700 }}>
+      <div className={styles.headRow}>
+        <div className={styles.headLabel}>
           きょうの分{" "}
-          <span data-testid="meds-progress" style={{ color: "#2b8fd6" }}>
-            <b style={{ fontSize: 19, fontWeight: 900 }}>{done}</b> /{" "}
-            <b style={{ fontSize: 19, fontWeight: 900 }}>{timings.length}</b> かんりょう
+          <span data-testid="meds-progress" className={styles.progress}>
+            <b className={styles.progressNum}>{done}</b> /{" "}
+            <b className={styles.progressNum}>{timings.length}</b> かんりょう
           </span>
         </div>
         <button
           data-testid="toggle-master"
           onClick={() => setMasterMode(!masterMode)}
-          style={{
-            border: "none",
-            background: "#fff",
-            color: "#1c6dab",
-            fontSize: 12,
-            fontWeight: 700,
-            borderRadius: 999,
-            padding: "7px 14px",
-            cursor: "pointer",
-            boxShadow: "0 1px 4px rgba(43,113,166,.15)",
-          }}
+          className={styles.masterToggle}
         >
           {masterMode ? "← チェックにもどる" : "マスタを編集"}
         </button>

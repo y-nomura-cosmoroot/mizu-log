@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "./AccordionHourRow.module.css";
+
 /** 履歴の時間ごとの折りたたみ行（▸クリックで展開） */
 export default function AccordionHourRow({
   testId,
@@ -19,33 +21,12 @@ export default function AccordionHourRow({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ borderTop: "1px solid #eef4f9" }}>
-      <div
-        data-testid={testId}
-        onClick={onToggle}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "11px 16px",
-          cursor: "pointer",
-          fontSize: 14,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 11,
-            color: "#2b8fd6",
-            display: "inline-block",
-            transform: open ? "rotate(90deg)" : "none",
-            transition: "transform .2s ease",
-          }}
-        >
-          ▸
-        </span>
-        <b style={{ width: 48, fontSize: 15 }}>{hourLabel}</b>
+    <div className={styles.wrap}>
+      <div data-testid={testId} onClick={onToggle} className={styles.header}>
+        <span className={`${styles.arrow} ${open ? styles.isOpen : ""}`}>▸</span>
+        <b className={styles.hourLabel}>{hourLabel}</b>
         {headerContent}
-        <span style={{ fontSize: 11, color: "#9db0bd" }}>{count}件</span>
+        <span className={styles.count}>{count}件</span>
       </div>
       {open && children}
     </div>

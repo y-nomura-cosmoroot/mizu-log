@@ -1,0 +1,67 @@
+.root {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--c-surface-soft);
+  border-radius: var(--r-12);
+  padding: 9px 12px;
+}
+
+.handle {
+  color: var(--c-line-hair);
+}
+
+.name {
+  flex: 1;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+}
+
+.smallBtn {
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  border-radius: var(--r-8);
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: var(--fs-12);
+}
+
+.delBtnSmall {
+  border: none;
+  background: var(--c-danger-100);
+  color: var(--c-danger-500);
+  border-radius: var(--r-8);
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: var(--fs-12);
+}
+
+.addRow {
+  display: flex;
+  gap: 8px;
+}
+
+.newInput {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: var(--fs-14);
+}
+
+.addBtn {
+  border: none;
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+  border-radius: var(--r-10);
+  padding: 9px 16px;
+  cursor: pointer;
+}

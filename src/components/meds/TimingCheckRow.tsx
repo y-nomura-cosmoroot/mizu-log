@@ -3,6 +3,8 @@
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import MedDoseList from "./MedDoseList";
+import medsStyles from "./meds.module.css";
+import styles from "./TimingCheckRow.module.css";
 
 export default function TimingCheckRow({ timing }: { timing: string }) {
   const medicines = useAppStore((s) => s.medicines);
@@ -18,61 +20,33 @@ export default function TimingCheckRow({ timing }: { timing: string }) {
   return (
     <div
       data-testid={`timing-row-${timing}`}
-      style={{
-        background: checked ? "#fff" : "#fff8e1",
-        border: checked ? "1px solid #e3eef6" : "1.5px solid #f0d98c",
-        borderRadius: 18,
-        padding: "13px 14px",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        boxShadow: "0 2px 10px rgba(43,113,166,.06)",
-        animation: timing === movedTiming ? "rowpop .6s ease" : "none",
-      }}
+      className={`${styles.row} ${checked ? styles.isChecked : ""} ${
+        timing === movedTiming ? medsStyles.isMoved : ""
+      }`}
     >
       <button
         data-testid={`timing-check-${timing}`}
         onClick={toggle}
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          border: checked ? "none" : "2px solid #d9c46a",
-          background: checked ? "#2b8fd6" : "#fff",
-          color: "#fff",
-          fontSize: 18,
-          fontWeight: 700,
-          cursor: "pointer",
-          flexShrink: 0,
-        }}
+        className={styles.checkBtn}
       >
         {checked ? "✓" : ""}
       </button>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 15, fontWeight: 900 }}>
+      <div className={styles.body}>
+        <div className={styles.title}>
           {timing}{" "}
-          <span style={{ fontSize: 12, fontWeight: 400, color: "#7a8b98" }}>
+          <span className={styles.status}>
             {checked ? "チェックずみ" : "まだ"}
           </span>
         </div>
-        <div style={{ fontSize: 12, color: "#7a8b98" }}>
-          <MedDoseList medicines={medicines} timing={timing} numberSize={15} />
+        <div className={styles.meds}>
+          <MedDoseList medicines={medicines} timing={timing} size="sm" />
         </div>
       </div>
       {!checked && (
         <button
           data-testid={`drank-btn-${timing}`}
           onClick={toggle}
-          style={{
-            border: "none",
-            background: "#2b8fd6",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 13,
-            borderRadius: 12,
-            padding: "10px 14px",
-            cursor: "pointer",
-          }}
+          className={styles.drankBtn}
         >
           のんだ！
         </button>

@@ -1,12 +1,12 @@
 "use client";
 
-import { inputBox } from "@/lib/styles";
 import { hourOf, targetMinute } from "@/lib/time";
 import { bpLevelOf, buildEffectOf, feverOf, pulseEffectOf } from "@/lib/vitalEffects";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { VitalRecord } from "@/types/records";
 import BodyFigure from "./BodyFigure";
+import styles from "./VitalsCard.module.css";
 
 const TEMP_OPTIONS: string[] = [];
 for (let t = 340; t <= 410; t++) TEMP_OPTIONS.push((t / 10).toFixed(1));
@@ -17,21 +17,6 @@ const FEVER_LABEL = {
   mild: "微熱",
   high: "高熱",
 } as const;
-const FEVER_CHIP = {
-  low: { background: "#e3f4fd", color: "#2f7fb8" },
-  normal: { background: "#dff0e3", color: "#2e7d4f" },
-  mild: { background: "#fdf1dc", color: "#b0761a" },
-  high: { background: "#fdeaea", color: "#c2453a" },
-} as const;
-
-const fieldLabel: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 900,
-  color: "#1c6dab",
-};
-
-const lastNote: React.CSSProperties = { fontSize: 10.5, color: "#7a8b98" };
-const lastVal: React.CSSProperties = { fontSize: 14, color: "#155a8f" };
 
 function BpIcon() {
   return (
@@ -105,53 +90,22 @@ export default function VitalsCard() {
     showToast("バイタルをきろくしました");
   };
 
-  const connectorRight: React.CSSProperties = {
-    position: "absolute",
-    left: "100%",
-    top: 13,
-    width: 22,
-    borderTop: "1.5px dashed #b9cdda",
-  };
-  const connectorLeft: React.CSSProperties = {
-    position: "absolute",
-    right: "100%",
-    top: 13,
-    width: 22,
-    borderTop: "1.5px dashed #b9cdda",
-  };
-
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 20,
-        padding: "16px 18px 14px",
-        boxShadow: "0 2px 10px rgba(43,113,166,.08)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontSize: 15, fontWeight: 900, color: "#1c6dab" }}>バイタル</span>
+    <div className={`panel ${styles.root}`}>
+      <div className={styles.headRow}>
+        <span className={styles.title}>バイタル</span>
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0,1fr) 124px minmax(0,1fr)",
-          columnGap: 22,
-          rowGap: 22,
-          alignItems: "start",
-          marginTop: 10,
-        }}
-      >
+      <div className={styles.grid}>
         {/* 体温 */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={connectorRight} />
-          <span style={fieldLabel}>🌡 体温</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div className={styles.field}>
+          <div className={styles.connR} />
+          <span className={styles.fieldLabel}>🌡 体温</span>
+          <div className={styles.inputRow}>
             <select
               data-testid="vital-temp-select"
               value={vitalInput.temp}
               onChange={(e) => setVitalField("temp", e.target.value)}
-              style={{ ...inputBox, flex: 1, minWidth: 0, padding: "8px 6px" }}
+              className={`input ${styles.tempSelect}`}
             >
               <option value="">-</option>
               {TEMP_OPTIONS.map((o) => (
@@ -160,50 +114,35 @@ export default function VitalsCard() {
                 </option>
               ))}
             </select>
-            <span style={{ fontSize: 12, color: "#7a8b98" }}>℃</span>
+            <span className={styles.unit}>℃</span>
           </div>
           {fever !== "none" && (
             <span
               data-testid="temp-status-chip"
-              style={{
-                ...FEVER_CHIP[fever],
-                fontWeight: 900,
-                fontSize: 12,
-                borderRadius: 999,
-                padding: "4px 12px",
-                textAlign: "center",
-              }}
+              data-fever={fever}
+              className={styles.tempChip}
             >
               {FEVER_LABEL[fever]}
             </span>
           )}
           {lastT && (
-            <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastT.recordedAt)}</b>時の記録
+            <span className={styles.lastNote}>
+              <b className={styles.lastVal}>{hourOf(lastT.recordedAt)}</b>時の記録
               <br />
-              <b style={lastVal}>{lastT.temp}℃</b>
+              <b className={styles.lastVal}>{lastT.temp}℃</b>
             </span>
           )}
         </div>
 
         {/* 人体SVG（中央、2行分） */}
-        <div
-          style={{
-            gridColumn: "2 / 3",
-            gridRow: "1 / span 2",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "stretch",
-          }}
-        >
+        <div className={styles.figureWrap}>
           <BodyFigure level={fever} build={build} pulse={pulse} bp={bp} />
         </div>
 
         {/* 血圧 */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={connectorLeft} />
-          <span style={{ ...fieldLabel, display: "flex", alignItems: "center", gap: 4 }}>
+        <div className={styles.field}>
+          <div className={styles.connL} />
+          <span className={`${styles.fieldLabel} ${styles.fieldLabelRow}`}>
             <BpIcon /> 血圧
           </span>
           <input
@@ -214,7 +153,7 @@ export default function VitalsCard() {
             onChange={(e) => setVitalField("bpSys", e.target.value)}
             inputMode="numeric"
             placeholder="上 120"
-            style={{ ...inputBox, width: "100%", boxSizing: "border-box" }}
+            className={`input ${styles.bpInput}`}
           />
           <input
             data-testid="vital-bp-dia"
@@ -224,13 +163,13 @@ export default function VitalsCard() {
             onChange={(e) => setVitalField("bpDia", e.target.value)}
             inputMode="numeric"
             placeholder="下 80"
-            style={{ ...inputBox, width: "100%", boxSizing: "border-box" }}
+            className={`input ${styles.bpInput}`}
           />
           {lastBP && (
-            <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastBP.recordedAt)}</b>時の記録
+            <span className={styles.lastNote}>
+              <b className={styles.lastVal}>{hourOf(lastBP.recordedAt)}</b>時の記録
               <br />
-              <b style={lastVal}>
+              <b className={styles.lastVal}>
                 {lastBP.bpSys}/{lastBP.bpDia || "—"}
               </b>
             </span>
@@ -238,10 +177,10 @@ export default function VitalsCard() {
         </div>
 
         {/* 脈拍 */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={connectorRight} />
-          <span style={fieldLabel}>💓 脈拍</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div className={styles.field}>
+          <div className={styles.connR} />
+          <span className={styles.fieldLabel}>💓 脈拍</span>
+          <div className={styles.inputRow}>
             <input
               data-testid="vital-pulse"
               type="number"
@@ -250,26 +189,26 @@ export default function VitalsCard() {
               onChange={(e) => setVitalField("pulse", e.target.value)}
               inputMode="numeric"
               placeholder="70"
-              style={{ ...inputBox, flex: 1, minWidth: 0 }}
+              className={`input ${styles.pulseInput}`}
             />
-            <span style={{ fontSize: 11, color: "#7a8b98" }}>回/分</span>
+            <span className={styles.unitSm}>回/分</span>
           </div>
           {lastP && (
-            <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastP.recordedAt)}</b>時の記録
+            <span className={styles.lastNote}>
+              <b className={styles.lastVal}>{hourOf(lastP.recordedAt)}</b>時の記録
               <br />
-              <b style={lastVal}>{lastP.pulse}回/分</b>
+              <b className={styles.lastVal}>{lastP.pulse}回/分</b>
             </span>
           )}
         </div>
 
         {/* 体重 */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={connectorLeft} />
-          <span style={{ ...fieldLabel, display: "flex", alignItems: "center", gap: 4 }}>
+        <div className={styles.field}>
+          <div className={styles.connL} />
+          <span className={`${styles.fieldLabel} ${styles.fieldLabelRow}`}>
             <WeightIcon /> 体重
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div className={styles.inputRow}>
             <input
               data-testid="vital-weight"
               type="number"
@@ -279,34 +218,21 @@ export default function VitalsCard() {
               onChange={(e) => setVitalField("weight", e.target.value)}
               inputMode="decimal"
               placeholder="55.0"
-              style={{ ...inputBox, flex: 1, minWidth: 0, textAlign: "right" }}
+              className={`input ${styles.weightInput}`}
             />
-            <span style={{ fontSize: 12, color: "#7a8b98" }}>kg</span>
+            <span className={styles.unit}>kg</span>
           </div>
           {lastW && (
-            <span style={lastNote}>
-              <b style={lastVal}>{hourOf(lastW.recordedAt)}</b>時の記録
+            <span className={styles.lastNote}>
+              <b className={styles.lastVal}>{hourOf(lastW.recordedAt)}</b>時の記録
               <br />
-              <b style={lastVal}>{lastW.weight}kg</b>
+              <b className={styles.lastVal}>{lastW.weight}kg</b>
             </span>
           )}
         </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 14 }}>
-        <button
-          data-testid="vital-save"
-          onClick={save}
-          style={{
-            border: "none",
-            background: "#2b8fd6",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 14,
-            borderRadius: 12,
-            padding: "11px 22px",
-            cursor: "pointer",
-          }}
-        >
+      <div className={styles.saveRow}>
+        <button data-testid="vital-save" onClick={save} className={styles.saveBtn}>
           記録
         </button>
       </div>

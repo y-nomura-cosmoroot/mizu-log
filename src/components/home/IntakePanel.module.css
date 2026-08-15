@@ -1,0 +1,125 @@
+/* kind(water/urine)ごとの配色は data-kind スコープのCSS変数で一括切替する。
+   ボーダー色(#bfdff2/#f2ddb5)と影はこのパネル専用のワンオフ値 */
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.panel[data-kind="water"] {
+  --ip-label: var(--c-primary-600);
+  --ip-num: var(--c-primary-700);
+  --ip-quick-sh: 0 3px 10px rgba(21, 90, 143, 0.18);
+  --ip-input-border: #bfdff2;
+  --ip-add-bg: var(--c-primary-500);
+  --ip-add-sh: 0 3px 10px rgba(21, 90, 143, 0.2);
+  --ip-pill-c: var(--c-primary-700);
+  --ip-pill-sh: 0 2px 6px rgba(21, 90, 143, 0.12);
+}
+
+.panel[data-kind="urine"] {
+  --ip-label: var(--c-urine-600);
+  --ip-num: var(--c-urine-700);
+  --ip-quick-sh: 0 3px 10px rgba(160, 106, 18, 0.18);
+  --ip-input-border: #f2ddb5;
+  --ip-add-bg: var(--c-urine-500);
+  --ip-add-sh: 0 3px 10px rgba(160, 106, 18, 0.2);
+  --ip-pill-c: var(--c-urine-700);
+  --ip-pill-sh: 0 2px 6px rgba(160, 106, 18, 0.12);
+}
+
+.label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-black);
+  color: var(--ip-label);
+}
+
+.hourNum {
+  font-size: var(--fs-38);
+  font-weight: var(--fw-black);
+  color: var(--ip-num);
+  line-height: 1;
+}
+
+.hourUnit {
+  font-size: var(--fs-14);
+}
+
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 6px;
+  padding-top: 10px;
+}
+
+.quickBtn {
+  border: none;
+  background: #fff;
+  color: var(--ip-label);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-13);
+  border-radius: var(--r-pill);
+  padding: 10px 15px;
+  box-shadow: var(--ip-quick-sh);
+  cursor: pointer;
+}
+
+.customRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.customInput {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid var(--ip-input-border);
+  color: var(--c-ink);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-12);
+  padding: 9px 10px;
+  width: 52px;
+  text-align: right;
+}
+
+.customUnit {
+  font-size: var(--fs-10);
+  color: var(--c-muted-600);
+  font-weight: var(--fw-bold);
+}
+
+.addBtn {
+  border: none;
+  background: var(--ip-add-bg);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-12-5);
+  border-radius: var(--r-12);
+  padding: 10px 13px;
+  box-shadow: var(--ip-add-sh);
+  cursor: pointer;
+}
+
+.totalPill {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ip-pill-c);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-12-5);
+  border-radius: var(--r-pill);
+  padding: 8px 16px;
+  box-shadow: var(--ip-pill-sh);
+}
+
+.totalNum {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-black);
+}
+
+.totalUnit {
+  font-size: var(--fs-14);
+}

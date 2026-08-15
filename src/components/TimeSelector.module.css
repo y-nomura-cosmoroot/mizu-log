@@ -1,0 +1,179 @@
+.selector {
+  position: relative;
+  background: #fff;
+  border-radius: var(--r-18);
+  padding: 10px 14px;
+  box-shadow: var(--sh-float);
+  z-index: 5;
+}
+
+/* homeタブでは左右16pxのインセットで置く */
+.selectorInset {
+  margin: 0 16px;
+}
+
+.headRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headLabel {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-600);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.stepBtn {
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-16);
+  border-radius: var(--r-12);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.toggle {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-700);
+  background: var(--c-primary-50);
+  border: 1.5px solid var(--c-water-100);
+  border-radius: var(--r-12);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.toggleCaret {
+  font-size: var(--fs-12);
+  color: var(--c-primary-500);
+}
+
+.overlayZ {
+  z-index: 6;
+}
+
+.dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  overflow: hidden;
+  z-index: 7;
+}
+
+.sectionLabel {
+  padding: 10px 16px 6px;
+  font-size: var(--fs-11-5);
+  font-weight: var(--fw-black);
+  color: var(--c-muted-500);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+
+.sectionLabelNext {
+  border-top: 1px solid var(--c-line-soft);
+  background: #fafcfe;
+  padding: 8px 16px 6px;
+}
+
+.hourGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 10px 14px 12px;
+}
+
+.hourGridNext {
+  padding: 10px 14px 14px;
+}
+
+/* 時間チップ。当日側/翌日側は data-side、選択は data-selected で切替 */
+.hourChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  border-radius: var(--r-10);
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  font-size: var(--fs-13-5);
+  font-weight: var(--fw-bold);
+  padding: 7px 12px 6px;
+  cursor: pointer;
+}
+
+.hourChip[data-side="today"] {
+  background: var(--c-primary-100);
+  color: var(--c-primary-700);
+}
+
+.hourChip[data-side="next"] {
+  background: var(--c-surface-dim);
+  color: var(--c-muted-600);
+}
+
+/* 選択はサイド配色より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+.hourChip[data-selected="true"] {
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
+}
+
+/* 現在時刻のチップ（今日を表示中のみ）: 内側リング+「いま」マークで示す */
+.hourChip[data-now="true"] {
+  box-shadow: inset 0 0 0 1.5px var(--c-primary-500);
+}
+
+/* 選択中（青塗り）と重なったときは白リングに切り替えて見えるようにする */
+.hourChip[data-selected="true"][data-now="true"] {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+}
+
+.nowMark {
+  font-size: var(--fs-10);
+  font-weight: var(--fw-black);
+  margin-right: 2px;
+}
+
+/* チップ下の飲水/尿量小計。記録なしでも高さを保つため visibility で隠す */
+.chipTotal {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.chipTotal.isHidden {
+  visibility: hidden;
+}
+
+.totalW {
+  color: var(--c-primary-600);
+}
+
+.totalSlash {
+  color: var(--c-line-slash);
+}
+
+.totalU {
+  color: var(--c-urine-600);
+}
+
+/* 選択中チップは青背景になるため、小計の数字は白系にして視認性を保つ */
+.hourChip[data-selected="true"] .totalW {
+  color: #fff;
+}
+
+.hourChip[data-selected="true"] .totalSlash {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hourChip[data-selected="true"] .totalU {
+  color: rgba(255, 255, 255, 0.8);
+}

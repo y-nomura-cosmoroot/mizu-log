@@ -4,18 +4,7 @@ import { countFlags } from "@/lib/aggregate";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { FlagKind } from "@/types/records";
-
-const flagBtn: React.CSSProperties = {
-  flex: 1,
-  border: "none",
-  background: "#eef6fc",
-  color: "#1c6dab",
-  fontWeight: 700,
-  fontSize: 14,
-  borderRadius: 14,
-  padding: "14px 0",
-  cursor: "pointer",
-};
+import styles from "./StoolMealCard.module.css";
 
 export default function StoolMealCard() {
   const flags = useAppStore((s) => s.flags);
@@ -33,22 +22,13 @@ export default function StoolMealCard() {
   };
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 20,
-        padding: "16px 18px",
-        boxShadow: "0 2px 10px rgba(43,113,166,.08)",
-      }}
-    >
-      <div style={{ fontSize: 15, fontWeight: 900, color: "#1c6dab", paddingBottom: 10 }}>
-        便・食事
-      </div>
-      <div style={{ display: "flex", gap: 10 }}>
-        <button data-testid="add-stool" onClick={() => add("stool")} style={flagBtn}>
+    <div className={`panel ${styles.root}`}>
+      <div className={styles.title}>便・食事</div>
+      <div className={styles.btnRow}>
+        <button data-testid="add-stool" onClick={() => add("stool")} className={styles.flagBtn}>
           💩 便があった{stoolCount ? `（${stoolCount}回）` : ""}
         </button>
-        <button data-testid="add-meal" onClick={() => add("meal")} style={flagBtn}>
+        <button data-testid="add-meal" onClick={() => add("meal")} className={styles.flagBtn}>
           🍴 食事をした{mealCount ? `（${mealCount}回）` : ""}
         </button>
       </div>

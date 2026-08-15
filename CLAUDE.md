@@ -13,7 +13,7 @@
 - **記録日は14時起点**（14:00〜翌13:59 が1日）。小計帯は8時間×3（14〜21時 / 22〜翌5時 / 翌6〜13時）
 - 飲水・尿量は個別記録を全保持し、合計・小計は**表示時に都度計算**（合計値は保存しない）
 - データは **localStorage 単一キー `mizu-log`**（`{state, version}` エンベロープ）。DB・サーバー同期なし、単一端末前提。バックアップ機能は作らない（確定）
-- Next.js 16 (App Router) + TypeScript + Zustand。スタイルは**デザインモック準拠のインラインstyle**（Tailwind不使用）
+- Next.js 16 (App Router) + TypeScript + Zustand。スタイルは **globals.css のデザイントークン（CSS変数）+ `@layer` 共通クラス + 各コンポーネント同置の CSS Modules**（Tailwind不使用）。インラインstyleは計算値のCSS変数注入（`--tank-h`・`--beat`）のみ許可。規約は [.claude/rules/styling.md](.claude/rules/styling.md)
 - 検索除け: metaタグ `noindex, nofollow`（layout.tsxのMetadata API）+ robots.txt Disallow。認証なし公開前提
 - **UIの正はデザインモック** `design/mizu-log App.dc.html`（Claude Design出力）。見た目の変更はモックと突き合わせる
 
@@ -46,9 +46,9 @@
 
 ## 主要ディレクトリ
 
-- [src/app/](src/app/) — `layout.tsx`（robotsメタ+Noto Sans JP）・`page.tsx`・`robots.ts`・`globals.css`（keyframes）
-- [src/components/](src/components/) — `AppShell.tsx`（タブ+`?tab=`URL同期+ハイドレーションゲート）と共通UI。配下に `home/` `input/` `meds/` `history/` `sheets/`
-- [src/lib/](src/lib/) — **Reactに依存しない純粋関数のみ**。`time.ts`（記録日・帯判定）・`aggregate.ts`（集計）・`meds.ts`・`calendar.ts`・`constants.ts`（GOAL_ML=2000, QUICK_AMOUNTS=[50,100,150,200]）・`styles.ts`
+- [src/app/](src/app/) — `layout.tsx`（robotsメタ+Noto Sans JP）・`page.tsx`・`robots.ts`・`globals.css`（**:root デザイントークン + @layer 共通クラス** + keyframes）
+- [src/components/](src/components/) — `AppShell.tsx`（タブ+`?tab=`URL同期+ハイドレーションゲート）と共通UI。配下に `home/` `input/` `meds/` `history/` `sheets/`。各コンポーネントの隣に `*.module.css`（履歴3兄弟共有の `history/history.module.css` あり）
+- [src/lib/](src/lib/) — **Reactに依存しない純粋関数のみ**。`time.ts`（記録日・帯判定）・`aggregate.ts`（集計）・`meds.ts`・`calendar.ts`・`constants.ts`（GOAL_ML=2000, QUICK_AMOUNTS=[50,100,150,200]）
 - [src/stores/](src/stores/) — `useAppStore.ts`（永続データ、zustand persist **v2**。v1→v2は薬の量 `dose`→`doseAmount`+`doseUnit` 分割）・`useUiStore.ts`（非永続UI状態）
 - [src/types/records.ts](src/types/records.ts) — 全データ型
 - [`src/lib/__tests__/`](src/lib/__tests__/) — Vitest、[e2e/](e2e/) — Playwright
@@ -61,7 +61,9 @@ npm run dev                              # 開発サーバー（ポート3000、
 npm run test                             # Vitest ユニットテスト
 npm run lint                             # ESLint（design/ は除外済み）
 npm run build                            # 本番ビルド
-npx playwright test                      # E2E（.next-e2e にビルドしてポート3100で自動起動）
+npx playwright test                      # 機能E2E+視覚回帰（.next-e2e にビルドしてポート3100で自動起動）
+npx playwright test --project=chromium   # 機能E2Eのみ
+npx playwright test --project=visual     # 視覚回帰のみ（スクショ比較。意図したUI変更後は --update-snapshots でベースライン更新）
 ```
 
 ## ハマりどころ（要点）
@@ -136,4 +138,5 @@ Claude Code の auto-memory（`~/.claude/.../memory/MEMORY.md`）には**書か�
 - [docs/plans/01-mizu-log-requirements.md](docs/plans/01-mizu-log-requirements.md) — 要件定義（記録項目・記録日/小計ルール・内服アラートの根拠）
 - [docs/plans/01-mizu-log-design-brief.md](docs/plans/01-mizu-log-design-brief.md) — デザインブリーフ（Claude Designへの入力に使った資料）
 - [docs/plans/02-mizu-log-implementation.md](docs/plans/02-mizu-log-implementation.md) — 実装計画（データモデル・E2E計画・モックとの意図的差分の一覧）
+- [docs/plans/03-inline-style-to-css-migration.md](docs/plans/03-inline-style-to-css-migration.md) — インラインstyle→CSSトークン+CSS Modules 移行計画（視覚回帰ハーネスの設計込み）
 - [design/mizu-log App.dc.html](design/mizu-log%20App.dc.html) — 確定デザインモック（**UIの正**。support.js と同じフォルダに置いたままブラウザで直接開ける）

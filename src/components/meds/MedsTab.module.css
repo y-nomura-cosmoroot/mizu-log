@@ -1,0 +1,38 @@
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 16px;
+}
+
+.headRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headLabel {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+}
+
+.progress {
+  color: var(--c-primary-500);
+}
+
+.progressNum {
+  font-size: var(--fs-19);
+  font-weight: var(--fw-black);
+}
+
+.masterToggle {
+  border: none;
+  background: #fff;
+  color: var(--c-primary-600);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-pill);
+  padding: 7px 14px;
+  cursor: pointer;
+  box-shadow: var(--sh-btn-s);
+}

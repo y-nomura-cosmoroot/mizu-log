@@ -11,6 +11,7 @@ import InputTab from "./input/InputTab";
 import MedsTab from "./meds/MedsTab";
 import HistoryTab from "./history/HistoryTab";
 import EditSheet from "./sheets/EditSheet";
+import styles from "./AppShell.module.css";
 
 export default function AppShell() {
   const ready = useUiStore((s) => s.ready);
@@ -23,16 +24,7 @@ export default function AppShell() {
   }, [init]);
 
   return (
-    <div
-      style={{
-        maxWidth: 430,
-        margin: "0 auto",
-        minHeight: "100vh",
-        background: "linear-gradient(180deg,#f5fbff 0%,#e6f3fc 100%)",
-        padding: "0 0 92px",
-        position: "relative",
-      }}
-    >
+    <div className={styles.shell}>
       {ready && hasHydrated && (
         <>
           <Header />

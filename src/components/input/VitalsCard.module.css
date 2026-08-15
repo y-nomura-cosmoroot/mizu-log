@@ -1,0 +1,163 @@
+.root {
+  padding: 16px 18px 14px;
+}
+
+.headRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-600);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr);
+  column-gap: 22px;
+  row-gap: 22px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* 人体SVGへ向かう破線コネクタ */
+.connR {
+  position: absolute;
+  left: 100%;
+  top: 13px;
+  width: 22px;
+  border-top: 1.5px dashed var(--c-line-hair);
+}
+
+.connL {
+  position: absolute;
+  right: 100%;
+  top: 13px;
+  width: 22px;
+  border-top: 1.5px dashed var(--c-line-hair);
+}
+
+.fieldLabel {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-600);
+}
+
+.fieldLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tempSelect {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 6px;
+}
+
+.bpInput {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pulseInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.weightInput {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+
+.unit {
+  font-size: var(--fs-12);
+  color: var(--c-muted-500);
+}
+
+.unitSm {
+  font-size: var(--fs-11);
+  color: var(--c-muted-500);
+}
+
+/* 体温の状態チップ。low の色はこのファイル限定のワンオフ */
+.tempChip {
+  font-weight: var(--fw-black);
+  font-size: var(--fs-12);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+  text-align: center;
+}
+
+.tempChip[data-fever="low"] {
+  background: #e3f4fd;
+  color: #2f7fb8;
+}
+
+.tempChip[data-fever="normal"] {
+  background: var(--c-ok-100);
+  color: var(--c-ok-700);
+}
+
+.tempChip[data-fever="mild"] {
+  background: var(--c-urine-100);
+  color: var(--c-urine-600);
+}
+
+.tempChip[data-fever="high"] {
+  background: var(--c-danger-100);
+  color: var(--c-danger-600);
+}
+
+.lastNote {
+  font-size: var(--fs-10-5);
+  color: var(--c-muted-500);
+}
+
+.lastVal {
+  font-size: var(--fs-14);
+  color: var(--c-primary-700);
+}
+
+.figureWrap {
+  grid-column: 2 / 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+}
+
+.saveRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
+}
+
+.saveBtn {
+  border: none;
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+  border-radius: var(--r-12);
+  padding: 11px 22px;
+  cursor: pointer;
+}

@@ -11,12 +11,11 @@ import {
   type FeverLevel,
   type PulseEffect,
 } from "@/lib/vitalEffects";
+import styles from "./BodyFigure.module.css";
 
 export type { BpLevel, BuildEffect, BuildLevel, FeverLevel, PulseEffect };
 
 const CX = 70; // シルエットの中心x（viewBox幅140の中央）
-
-const colorT = { transition: "fill .4s ease" } as const;
 
 /**
  * 体温で色が変わり、体重で体型が変わる人体シルエットSVG。
@@ -112,8 +111,8 @@ export default function BodyFigure({
       height="252"
       viewBox="0 0 140 252"
     >
-      <ellipse cx={CX} cy="26" rx={headRx} ry={headRy} fill={c} style={colorT} />
-      <path d={torsoPath} fill={c} style={colorT} />
+      <ellipse cx={CX} cy="26" rx={headRx} ry={headRy} fill={c} className={styles.colorT} />
+      <path d={torsoPath} fill={c} className={styles.colorT} />
       <rect
         x={leftArmX}
         y="56"
@@ -122,7 +121,7 @@ export default function BodyFigure({
         rx={armW / 2}
         transform={`rotate(${armAngle} ${leftArmX + armW / 2} 60)`}
         fill={c}
-        style={colorT}
+        className={styles.colorT}
       />
       <rect
         x={rightArmX}
@@ -132,7 +131,7 @@ export default function BodyFigure({
         rx={armW / 2}
         transform={`rotate(${-armAngle} ${rightArmX + armW / 2} 60)`}
         fill={c}
-        style={colorT}
+        className={styles.colorT}
       />
       <rect
         x={leftLegX}
@@ -141,7 +140,7 @@ export default function BodyFigure({
         height="116"
         rx={legW / 2}
         fill={c}
-        style={colorT}
+        className={styles.colorT}
       />
       <rect
         x={rightLegX}
@@ -150,13 +149,12 @@ export default function BodyFigure({
         height="116"
         rx={legW / 2}
         fill={c}
-        style={colorT}
+        className={styles.colorT}
       />
       {bp === "high" && (
         <g
           data-testid="bp-veins"
-          // 点滅させて健康に害がある状態だと分かるようにする
-          style={{ animation: "vein-blink 1s ease-in-out infinite" }}
+          className={styles.veins}
           stroke="#a52a4a"
           strokeWidth="1.8"
           strokeLinecap="round"
@@ -176,11 +174,7 @@ export default function BodyFigure({
       {bp === "low" && (
         <g
           data-testid="dizzy-marks"
-          style={{
-            animation: "dizzy-sway 2.4s ease-in-out infinite",
-            transformBox: "fill-box",
-            transformOrigin: "center",
-          }}
+          className={styles.dizzy}
           stroke="#7d9bd2"
           strokeWidth="1.8"
           strokeLinecap="round"
@@ -200,13 +194,10 @@ export default function BodyFigure({
       )}
       <g data-testid="heart" transform={`translate(${heartX} ${heartY})`}>
         <g
-          style={{
-            animation: `heartbeat ${beatSec}s ease-in-out infinite`,
-            transformBox: "fill-box",
-            transformOrigin: "center",
-          }}
+          className={styles.heartBeat}
+          style={{ "--beat": `${beatSec}s` } as React.CSSProperties}
         >
-          <path d={heartPath} fill={heartColor} style={colorT} />
+          <path d={heartPath} fill={heartColor} className={styles.colorT} />
           {pulse.level === "high" && (
             <g
               data-testid="heart-effect-lines"

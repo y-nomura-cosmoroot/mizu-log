@@ -1,28 +1,9 @@
 "use client";
 
-import { inputBox } from "@/lib/styles";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
-
-const smallBtn: React.CSSProperties = {
-  border: "none",
-  background: "#eef6fc",
-  color: "#1c6dab",
-  borderRadius: 8,
-  padding: "5px 10px",
-  cursor: "pointer",
-  fontSize: 12,
-};
-
-const delBtnSmall: React.CSSProperties = {
-  border: "none",
-  background: "#fdeaea",
-  color: "#c25454",
-  borderRadius: 8,
-  padding: "5px 10px",
-  cursor: "pointer",
-  fontSize: 12,
-};
+import medsStyles from "./meds.module.css";
+import styles from "./TimingMasterCard.module.css";
 
 export default function TimingMasterCard() {
   const timings = useAppStore((s) => s.timings);
@@ -49,71 +30,48 @@ export default function TimingMasterCard() {
   };
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 20,
-        padding: "16px 18px",
-        boxShadow: "0 2px 10px rgba(43,113,166,.08)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-      }}
-    >
-      <div style={{ fontSize: 13, fontWeight: 700, color: "#7a8b98" }}>のむタイミング</div>
+    <div className={`panel ${styles.root}`}>
+      <div className={medsStyles.sectionLabel}>のむタイミング</div>
       {timings.map((t, i) => (
         <div
           key={t}
           data-testid={`timing-master-row-${t}`}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#f7fbfe",
-            borderRadius: 12,
-            padding: "9px 12px",
-            animation: t === movedTiming ? "rowpop .6s ease" : "none",
-          }}
+          className={`${styles.row} ${t === movedTiming ? medsStyles.isMoved : ""}`}
         >
-          <span style={{ color: "#b9cdda" }}>≡</span>
-          <span style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{t}</span>
-          <button data-testid={`timing-up-${t}`} onClick={() => move(i, -1)} style={smallBtn}>
+          <span className={styles.handle}>≡</span>
+          <span className={styles.name}>{t}</span>
+          <button
+            data-testid={`timing-up-${t}`}
+            onClick={() => move(i, -1)}
+            className={styles.smallBtn}
+          >
             ↑
           </button>
-          <button data-testid={`timing-down-${t}`} onClick={() => move(i, 1)} style={smallBtn}>
+          <button
+            data-testid={`timing-down-${t}`}
+            onClick={() => move(i, 1)}
+            className={styles.smallBtn}
+          >
             ↓
           </button>
           <button
             data-testid={`timing-del-${t}`}
             onClick={() => removeTiming(t)}
-            style={delBtnSmall}
+            className={styles.delBtnSmall}
           >
             けす
           </button>
         </div>
       ))}
-      <div style={{ display: "flex", gap: 8 }}>
+      <div className={styles.addRow}>
         <input
           data-testid="new-timing-input"
           value={newTiming}
           onChange={(e) => setNewTiming(e.target.value)}
           placeholder="例: ねる前"
-          style={{ ...inputBox, flex: 1, padding: "9px 12px", fontSize: 14 }}
+          className={`input ${styles.newInput}`}
         />
-        <button
-          data-testid="add-timing"
-          onClick={add}
-          style={{
-            border: "none",
-            background: "#2b8fd6",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 13,
-            borderRadius: 10,
-            padding: "9px 16px",
-            cursor: "pointer",
-          }}
-        >
+        <button data-testid="add-timing" onClick={add} className={styles.addBtn}>
           追加
         </button>
       </div>

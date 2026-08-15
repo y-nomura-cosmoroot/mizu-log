@@ -12,7 +12,19 @@ export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
-  reporter: [["list"]],
+  reporter: [["list"], ["html", { open: "never" }]],
+  // ベースラインPNGの保存先。Windowsローカル専用（プラットフォームサフィックスを
+  // 外しているため、別OSでベースラインを再生成しないこと）
+  snapshotPathTemplate: "{testDir}/__screenshots__/{testFileName}/{arg}{ext}",
+  expect: {
+    // インラインstyle→CSS移行の視覚回帰は「1ピクセルも変えない」が合格条件
+    toHaveScreenshot: {
+      maxDiffPixels: 0,
+      threshold: 0,
+      animations: "disabled",
+      caret: "hide",
+    },
+  },
   use: {
     baseURL: BASE_URL,
     viewport: { width: 430, height: 940 },
@@ -22,7 +34,16 @@ export default defineConfig({
   },
   projects: [
     {
+      // 機能E2E（スタイル非依存）。視覚回帰は visual プロジェクトに分離
       name: "chromium",
+      testIgnore: /visual\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 430, height: 940 } },
+    },
+    {
+      // 視覚回帰専用。flakyを隠さないため retries: 0 固定
+      name: "visual",
+      testMatch: /visual\.spec\.ts/,
+      retries: 0,
       use: { ...devices["Desktop Chrome"], viewport: { width: 430, height: 940 } },
     },
   ],

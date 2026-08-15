@@ -1,0 +1,19 @@
+.selectorWrap {
+  padding: 2px 0 6px;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 240px);
+  overflow: hidden;
+  background: var(--c-primary-50);
+}
+
+.panels {
+  position: relative;
+  flex: 1;
+  display: flex;
+  padding: 10px 0;
+}

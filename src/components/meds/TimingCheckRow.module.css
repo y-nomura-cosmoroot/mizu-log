@@ -1,0 +1,65 @@
+/* 未チェック時は黄色系で「まだ」を目立たせる（1ファイル閉じのワンオフ色） */
+.row {
+  background: #fff8e1;
+  border: 1.5px solid #f0d98c;
+  border-radius: var(--r-18);
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--sh-row);
+}
+
+.row.isChecked {
+  background: #fff;
+  border: 1px solid var(--c-line-nav);
+}
+
+.checkBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-full);
+  border: 2px solid #d9c46a;
+  background: #fff;
+  color: #fff;
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.isChecked .checkBtn {
+  border: none;
+  background: var(--c-primary-500);
+}
+
+.body {
+  flex: 1;
+}
+
+.title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+}
+
+.status {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  color: var(--c-muted-500);
+}
+
+.meds {
+  font-size: var(--fs-12);
+  color: var(--c-muted-500);
+}
+
+.drankBtn {
+  border: none;
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+  border-radius: var(--r-12);
+  padding: 10px 14px;
+  cursor: pointer;
+}

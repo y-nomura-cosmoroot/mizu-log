@@ -1,0 +1,27 @@
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--c-primary-700);
+  color: #fff;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-pill);
+  padding: 10px 20px;
+  z-index: 50;
+  animation: toastin 0.25s ease;
+  white-space: nowrap;
+}
+
+/* keyframes は参照するモジュール内に置く（グローバルだと名前が一致しない） */
+@keyframes toastin {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

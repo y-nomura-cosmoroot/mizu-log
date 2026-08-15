@@ -1,0 +1,27 @@
+.root {
+  padding: 16px 18px;
+}
+
+.title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-600);
+  padding-bottom: 10px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+}
+
+.flagBtn {
+  flex: 1;
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+  border-radius: var(--r-14);
+  padding: 14px 0;
+  cursor: pointer;
+}
