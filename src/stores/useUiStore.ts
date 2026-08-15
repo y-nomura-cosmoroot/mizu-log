@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { IntakeKind, RecordDate } from "@/types/records";
+import { addMonthsFirst, ymKey } from "@/lib/calendar";
 import { DEFAULT_CUSTOM_ML, TOAST_MS } from "@/lib/constants";
 import { addDays, getRecordDate, HOUR_CYCLE } from "@/lib/time";
 import type { VitalInput } from "./useAppStore";
@@ -25,6 +26,8 @@ interface UiStore {
   ready: boolean;
   tab: Tab;
   histSub: HistSub;
+  /** りれきタブの「月ごとに見る」トグル */
+  histMonthly: boolean;
   viewDate: RecordDate;
   selHour: number;
   hourDropOpen: boolean;
@@ -46,8 +49,11 @@ interface UiStore {
   init: (now: Date) => void;
   setTab: (tab: Tab) => void;
   setHistSub: (sub: HistSub) => void;
+  setHistMonthly: (v: boolean) => void;
   goPrevDay: () => void;
   goNextDay: (now: Date) => void;
+  goPrevMonth: () => void;
+  goNextMonth: (now: Date) => void;
   setViewDate: (date: RecordDate) => void;
   setSelHour: (h: number) => void;
   stepSelHour: (delta: 1 | -1) => void;
@@ -78,6 +84,7 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   ready: false,
   tab: "home",
   histSub: "water",
+  histMonthly: false,
   viewDate: "",
   selHour: 14,
   hourDropOpen: false,
@@ -119,12 +126,22 @@ export const useUiStore = create<UiStore>()((set, get) => ({
     set({ histSub: sub });
     writeUrl(get().tab, sub);
   },
+  setHistMonthly: (v) => set({ histMonthly: v, calOpen: false }),
   goPrevDay: () => set((s) => ({ viewDate: addDays(s.viewDate, -1), calYM: null })),
   goNextDay: (now) =>
     set((s) => {
       const today = getRecordDate(now);
       if (s.viewDate >= today) return s;
       return { viewDate: addDays(s.viewDate, 1), calYM: null };
+    }),
+  goPrevMonth: () => set((s) => ({ viewDate: addMonthsFirst(s.viewDate, -1), calYM: null })),
+  goNextMonth: (now) =>
+    set((s) => {
+      const today = getRecordDate(now);
+      if (ymKey(s.viewDate) >= ymKey(today)) return s;
+      const next = addMonthsFirst(s.viewDate, 1);
+      // 今月へ戻ってきたら1日ではなく今日に合わせる（日ごと表示に戻ったとき自然）
+      return { viewDate: ymKey(next) === ymKey(today) ? today : next, calYM: null };
     }),
   setViewDate: (date) => set({ viewDate: date, calOpen: false, calYM: null }),
   setSelHour: (h) => set({ selHour: h, hourDropOpen: false }),

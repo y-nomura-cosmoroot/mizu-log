@@ -1,0 +1,88 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--c-line-soft);
+  background: #fff;
+  cursor: pointer;
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+/* 記録がない日は行ごと薄くする */
+.row.isEmpty {
+  background: var(--c-surface-row);
+}
+
+.dayCol {
+  width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.dayNum {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-black);
+  line-height: 1;
+}
+
+.dayMeta {
+  font-size: var(--fs-10-5);
+  font-weight: var(--fw-bold);
+  color: var(--c-muted-500);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+  font-size: var(--fs-12);
+  color: var(--c-ink-sub);
+}
+
+.num {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+}
+
+.numWater {
+  color: var(--c-primary-600);
+}
+
+.numUrine {
+  color: var(--c-urine-600);
+}
+
+.unit {
+  font-size: var(--fs-11);
+}
+
+.flagPart {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.flagNum {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-700);
+}
+
+.empty {
+  font-size: var(--fs-12);
+  color: var(--c-muted-400);
+}
+
+.alert {
+  font-size: var(--fs-16);
+  flex-shrink: 0;
+}

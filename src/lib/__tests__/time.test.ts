@@ -10,6 +10,7 @@ import {
   minuteOf,
   targetMinute,
   toRecordedAt,
+  weekdayOf,
 } from "../time";
 
 describe("getRecordDate（記録日は14時起点）", () => {
@@ -114,5 +115,11 @@ describe("addDays / formatDateLabel", () => {
   });
   it("日付ラベル（2026-08-14は金曜）", () => {
     expect(formatDateLabel("2026-08-14")).toBe("8/14(金)");
+  });
+});
+
+describe("weekdayOf", () => {
+  it("曜日1文字", () => {
+    expect(weekdayOf("2026-08-14")).toBe("金");
   });
 });

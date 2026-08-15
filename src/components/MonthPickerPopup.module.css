@@ -1,0 +1,84 @@
+.overlayZ {
+  z-index: 21;
+}
+
+.popup {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  width: 280px;
+  padding: 12px 14px;
+  z-index: 22;
+}
+
+.yearRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.yearBtn {
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-15);
+  border-radius: var(--r-10);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.yearBtn:disabled {
+  background: var(--c-surface-dim);
+  color: var(--c-disabled);
+  cursor: default;
+}
+
+.yearLabel {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-700);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+/* 月セル。状態は data-state="selected|disabled|today|normal" で切替（日カレンダーと同じ配色） */
+.cell {
+  border: none;
+  border-radius: var(--r-10);
+  font-size: var(--fs-13);
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.cell[data-state="normal"] {
+  background: var(--c-line-softer);
+  color: var(--c-ink);
+  font-weight: var(--fw-bold);
+}
+
+.cell[data-state="today"] {
+  border: 2px solid var(--c-primary-500);
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  padding: 8px 0;
+}
+
+.cell[data-state="selected"] {
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
+}
+
+.cell[data-state="disabled"] {
+  background: none;
+  color: var(--c-disabled);
+  cursor: default;
+}

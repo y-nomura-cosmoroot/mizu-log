@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FlagRecord, IntakeRecord, VitalRecord } from "@/types/records";
 import {
+  buildMonthlySummary,
   countFlags,
   groupIntakesByBandHour,
   groupVitalEntriesByBandHour,
@@ -269,5 +270,69 @@ describe("countFlags", () => {
     expect(countFlags(flags, "stool", D)).toBe(2);
     expect(countFlags(flags, "meal", D)).toBe(1);
     expect(countFlags(flags, "stool", "2026-08-13")).toBe(0);
+  });
+});
+
+describe("buildMonthlySummary（月ごと一覧）", () => {
+  const timings = ["朝", "晩"];
+  const intakes = [
+    intake("water", 15, 0, 500, "2026-08-10"),
+    intake("water", 16, 0, 200, "2026-08-10"),
+    intake("urine", 15, 0, 250, "2026-08-10"),
+    intake("water", 15, 0, 100, "2026-07-31"), // 前月分は含めない
+  ];
+  const flags: FlagRecord[] = [
+    { id: "mf1", kind: "stool", recordDate: "2026-08-10", recordedAt: "2026-08-10T15:00" },
+    { id: "mf2", kind: "stool", recordDate: "2026-08-10", recordedAt: "2026-08-10T16:00" },
+    { id: "mf3", kind: "meal", recordDate: "2026-08-10", recordedAt: "2026-08-10T18:00" },
+  ];
+  const medChecks = {
+    "2026-08-10": { 朝: 8 },
+    "2026-08-12": { 朝: 8, 晩: 19 },
+  };
+  const days = buildMonthlySummary(
+    intakes, [], flags, medChecks, timings, 2026, 7, "2026-08-14"
+  );
+
+  it("今日までの日数分の行になる（未来日は出さない）", () => {
+    expect(days).toHaveLength(14);
+    expect(days[0].date).toBe("2026-08-01");
+    expect(days[13].date).toBe("2026-08-14");
+  });
+  it("日別に飲水/尿/便/食事が集計される", () => {
+    const d10 = days[9];
+    expect(d10.day).toBe(10);
+    expect(d10.waterMl).toBe(700);
+    expect(d10.urineMl).toBe(250);
+    expect(d10.stoolCount).toBe(2);
+    expect(d10.mealCount).toBe(1);
+    expect(d10.hasRecords).toBe(true);
+  });
+  it("飲み忘れは「記録がある日」だけ判定する", () => {
+    expect(days[9].medsMissed).toBe(true); // 8/10: 朝のみチェック
+    expect(days[11].medsMissed).toBe(false); // 8/12: 全チェック
+    expect(days[0].hasRecords).toBe(false); // 8/1: 記録なし
+    expect(days[0].medsMissed).toBe(false); // → 判定しない
+  });
+  it("バイタルだけの日も記録ありとして扱う", () => {
+    const vitals: VitalRecord[] = [
+      {
+        id: "mv1",
+        recordDate: "2026-08-05",
+        recordedAt: "2026-08-05T15:00",
+        temp: "36.5",
+        bpSys: "",
+        bpDia: "",
+        pulse: "",
+        weight: "",
+      },
+    ];
+    const withV = buildMonthlySummary([], vitals, [], {}, timings, 2026, 7, "2026-08-14");
+    expect(withV[4].hasRecords).toBe(true);
+    expect(withV[4].medsMissed).toBe(true); // 未チェックなので飲み忘れ扱い
+  });
+  it("過去月は末日まで、未来月は空配列", () => {
+    expect(buildMonthlySummary([], [], [], {}, timings, 2026, 6, "2026-08-14")).toHaveLength(31);
+    expect(buildMonthlySummary([], [], [], {}, timings, 2026, 8, "2026-08-14")).toHaveLength(0);
   });
 });

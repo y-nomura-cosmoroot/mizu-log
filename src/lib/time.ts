@@ -86,3 +86,9 @@ export function formatDateLabel(recordDate: RecordDate): string {
   const date = new Date(y, mo - 1, d);
   return `${mo}/${d}(${YOBI[date.getDay()]})`;
 }
+
+/** 記録日の曜日1文字（'土' 等。月ごと一覧の行メタ用） */
+export function weekdayOf(recordDate: RecordDate): string {
+  const [y, mo, d] = recordDate.split("-").map(Number);
+  return YOBI[new Date(y, mo - 1, d).getDay()];
+}

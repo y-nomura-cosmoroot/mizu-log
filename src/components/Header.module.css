@@ -36,6 +36,7 @@
 }
 
 .dateRow {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,10 +57,28 @@
   cursor: pointer;
 }
 
+/* 「今日に戻る」: 右端に固定（矢印と日付の中央寄せに影響させない）。月ごと表示中は非表示 */
+.todayBtn {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: #fff;
+  color: var(--c-primary-600);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-pill);
+  padding: 8px 10px;
+  box-shadow: var(--sh-btn-s);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .dateWrap {
   position: relative;
   text-align: center;
-  min-width: 150px;
+  min-width: 110px;
   z-index: 20;
 }
 
@@ -78,4 +97,51 @@
   display: flex;
   gap: 6px;
   padding: 0 16px 10px;
+}
+
+/* 「月ごとに見る」トグルスイッチ（りれきタブ表示中のみ、ブランド行の右端） */
+.monthlyToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.switchTrack {
+  display: block;
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--c-disabled);
+  transition: background 0.2s ease;
+}
+
+.switchKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-full);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(21, 50, 75, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.monthlyToggle[data-on="true"] .switchTrack {
+  background: var(--c-primary-500);
+}
+
+.monthlyToggle[data-on="true"] .switchKnob {
+  transform: translateX(14px);
+}
+
+.switchLabel {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--c-primary-600);
 }

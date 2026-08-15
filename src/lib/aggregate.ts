@@ -3,11 +3,13 @@ import type {
   FlagRecord,
   IntakeKind,
   IntakeRecord,
+  MedChecks,
   RecordDate,
   VitalRecord,
 } from "@/types/records";
 import { BAND_DEFS, type BandNo } from "./constants";
-import { band, hourOf, hourOrder, minuteOf } from "./time";
+import { uncheckedTimings } from "./meds";
+import { band, formatCalendarDate, hourOf, hourOrder, minuteOf } from "./time";
 
 export function sumForHour(
   intakes: IntakeRecord[],
@@ -201,4 +203,61 @@ export function countFlags(
   date: RecordDate
 ): number {
   return flags.filter((f) => f.kind === kind && f.recordDate === date).length;
+}
+
+/** 月ごと一覧の1日分サマリ */
+export interface MonthlyDaySummary {
+  date: RecordDate;
+  day: number;
+  waterMl: number;
+  urineMl: number;
+  stoolCount: number;
+  mealCount: number;
+  /** 何かしらの記録（飲水/尿・バイタル・便食事・内服チェック）がある日か */
+  hasRecords: boolean;
+  /** 飲み忘れ表示。記録がない日は判定しない（アプリ利用前の日が全部⚠️になるのを防ぐ） */
+  medsMissed: boolean;
+}
+
+/**
+ * 月ごと表示用: 指定月の1日〜末日（今日の記録日より後は除く）を日別サマリにする。
+ * 未来月を指定した場合は空配列。
+ */
+export function buildMonthlySummary(
+  intakes: IntakeRecord[],
+  vitals: VitalRecord[],
+  flags: FlagRecord[],
+  medChecks: MedChecks,
+  timings: string[],
+  year: number,
+  month0: number,
+  todayRecordDate: RecordDate
+): MonthlyDaySummary[] {
+  const lastDay = new Date(year, month0 + 1, 0).getDate();
+  const out: MonthlyDaySummary[] = [];
+  for (let d = 1; d <= lastDay; d++) {
+    const date = formatCalendarDate(new Date(year, month0, d));
+    if (date > todayRecordDate) break;
+    const waterMl = sumForDay(intakes, "water", date);
+    const urineMl = sumForDay(intakes, "urine", date);
+    const stoolCount = countFlags(flags, "stool", date);
+    const mealCount = countFlags(flags, "meal", date);
+    const hasVital = vitals.some((v) => v.recordDate === date);
+    const hasCheck = Object.keys(medChecks[date] ?? {}).length > 0;
+    const hasRecords =
+      waterMl > 0 || urineMl > 0 || stoolCount > 0 || mealCount > 0 || hasVital || hasCheck;
+    const medsMissed =
+      hasRecords && uncheckedTimings(timings, medChecks, date).length > 0;
+    out.push({
+      date,
+      day: d,
+      waterMl,
+      urineMl,
+      stoolCount,
+      mealCount,
+      hasRecords,
+      medsMissed,
+    });
+  }
+  return out;
 }

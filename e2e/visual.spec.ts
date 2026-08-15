@@ -131,6 +131,13 @@ test.describe("視覚回帰: history", () => {
     await expect(page.getByTestId("meds-result-card")).toHaveAttribute("data-ok", "true");
     await expect(page).toHaveScreenshot("history-meds-ok.png", { fullPage: true });
   });
+
+  test("history-monthly", async ({ page }) => {
+    await openSeeded(page, "/?tab=history");
+    await page.getByTestId("toggle-monthly").click();
+    await expect(page.getByTestId("month-row-2026-08-14")).toBeVisible();
+    await expect(page).toHaveScreenshot("history-monthly.png", { fullPage: true });
+  });
 });
 
 test.describe("視覚回帰: シート", () => {

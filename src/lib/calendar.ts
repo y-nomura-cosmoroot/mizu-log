@@ -59,4 +59,15 @@ export function ymOf(date: RecordDate): { year: number; month0: number } {
   return { year: y, month0: m - 1 };
 }
 
+/** 年月比較用のキー（'YYYY-MM'）。文字列比較で月の前後判定ができる */
+export function ymKey(date: RecordDate): string {
+  return date.slice(0, 7);
+}
+
+/** nヶ月先（負なら前）の月の1日を返す（月ごと表示の月送り用） */
+export function addMonthsFirst(date: RecordDate, n: number): RecordDate {
+  const { year, month0 } = ymOf(date);
+  return formatCalendarDate(new Date(year, month0 + n, 1));
+}
+
 export { pad2 };

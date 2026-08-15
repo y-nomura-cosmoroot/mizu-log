@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildCalendarCells, formatCalendarLabel, ymOf } from "../calendar";
+import {
+  addMonthsFirst,
+  buildCalendarCells,
+  formatCalendarLabel,
+  ymKey,
+  ymOf,
+} from "../calendar";
 
 describe("buildCalendarCells", () => {
   // 2026年8月: 8/1は土曜(dow=6)、31日まで
@@ -28,5 +34,20 @@ describe("formatCalendarLabel / ymOf", () => {
   });
   it("RecordDateから年月を取り出す", () => {
     expect(ymOf("2026-08-14")).toEqual({ year: 2026, month0: 7 });
+  });
+});
+
+describe("addMonthsFirst / ymKey（月ごと表示の月送り）", () => {
+  it("前月・翌月の1日を返す", () => {
+    expect(addMonthsFirst("2026-08-14", -1)).toBe("2026-07-01");
+    expect(addMonthsFirst("2026-08-14", 1)).toBe("2026-09-01");
+  });
+  it("年をまたぐ", () => {
+    expect(addMonthsFirst("2026-01-15", -1)).toBe("2025-12-01");
+    expect(addMonthsFirst("2025-12-15", 1)).toBe("2026-01-01");
+  });
+  it("ymKeyは年月の文字列比較キー", () => {
+    expect(ymKey("2026-08-14")).toBe("2026-08");
+    expect(ymKey("2026-07-31") < ymKey("2026-08-01")).toBe(true);
   });
 });
