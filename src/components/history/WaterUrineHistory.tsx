@@ -34,6 +34,30 @@ export default function WaterUrineHistory() {
 
   return (
     <>
+      <div
+        style={{
+          ...card,
+          padding: "12px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: 13,
+        }}
+      >
+        <b>1日の合計</b>
+        <span style={{ fontSize: 12, color: "#46698a" }}>
+          飲水{" "}
+          <b data-testid="day-total-water" style={{ fontSize: 19, color: "#1c6dab" }}>
+            {waterTotal}
+            <span style={{ fontSize: 12 }}>ml</span>
+          </b>{" "}
+          ・ 尿{" "}
+          <b data-testid="day-total-urine" style={{ fontSize: 19, color: "#b0761a" }}>
+            {urineTotal}
+            <span style={{ fontSize: 12 }}>ml</span>
+          </b>
+        </span>
+      </div>
       {bands.map((b) => (
         <div key={b.band} style={card}>
           <div
@@ -161,30 +185,6 @@ export default function WaterUrineHistory() {
           ))}
         </div>
       ))}
-      <div
-        style={{
-          ...card,
-          padding: "12px 16px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: 13,
-        }}
-      >
-        <b>1日の合計</b>
-        <span style={{ fontSize: 12, color: "#46698a" }}>
-          飲水{" "}
-          <b data-testid="day-total-water" style={{ fontSize: 19, color: "#1c6dab" }}>
-            {waterTotal}
-            <span style={{ fontSize: 12 }}>ml</span>
-          </b>{" "}
-          ・ 尿{" "}
-          <b data-testid="day-total-urine" style={{ fontSize: 19, color: "#b0761a" }}>
-            {urineTotal}
-            <span style={{ fontSize: 12 }}>ml</span>
-          </b>
-        </span>
-      </div>
     </>
   );
 }

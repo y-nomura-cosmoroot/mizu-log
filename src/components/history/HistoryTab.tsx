@@ -13,7 +13,7 @@ export default function HistoryTab() {
         display: "flex",
         flexDirection: "column",
         gap: 12,
-        padding: "2px 16px 4px",
+        padding: "8px 16px 4px",
       }}
     >
       {histSub === "water" && <WaterUrineHistory />}

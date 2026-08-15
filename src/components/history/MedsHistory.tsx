@@ -21,6 +21,34 @@ export default function MedsHistory() {
 
   return (
     <>
+      <div
+        data-testid="meds-result-card"
+        data-ok={ok}
+        style={{
+          background: ok ? "#e6f7ec" : "#fdeaea",
+          border: `2px solid ${ok ? "#7cc79a" : "#e58b83"}`,
+          borderRadius: 16,
+          padding: "14px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          boxShadow: `0 4px 14px ${ok ? "rgba(46,125,79,.16)" : "rgba(194,69,58,.18)"}`,
+        }}
+      >
+        <span style={{ fontSize: 22 }}>{ok ? "🎉" : "⚠️"}</span>
+        <div style={{ flex: 1 }}>
+          <div
+            style={{ fontSize: 17, fontWeight: 900, color: ok ? "#2e7d4f" : "#c2453a" }}
+          >
+            {ok ? "飲み忘れなし！" : "飲み忘れあり！"}
+          </div>
+          <div style={{ fontSize: 12, color: "#5d7488" }}>
+            {ok
+              ? "この日はぜんぶ飲めました。えらい！"
+              : `${unchecked.join("・")} がまだです`}
+          </div>
+        </div>
+      </div>
       {bands.map((b) => (
         <div key={b.band} style={card}>
           <div style={{ padding: "10px 16px", background: "#f2f9fe", fontSize: 13 }}>
@@ -83,35 +111,6 @@ export default function MedsHistory() {
           ))}
         </div>
       ))}
-
-      <div
-        data-testid="meds-result-card"
-        data-ok={ok}
-        style={{
-          background: ok ? "#e6f7ec" : "#fdeaea",
-          border: `2px solid ${ok ? "#7cc79a" : "#e58b83"}`,
-          borderRadius: 16,
-          padding: "14px 16px",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          boxShadow: `0 4px 14px ${ok ? "rgba(46,125,79,.16)" : "rgba(194,69,58,.18)"}`,
-        }}
-      >
-        <span style={{ fontSize: 22 }}>{ok ? "🎉" : "⚠️"}</span>
-        <div style={{ flex: 1 }}>
-          <div
-            style={{ fontSize: 17, fontWeight: 900, color: ok ? "#2e7d4f" : "#c2453a" }}
-          >
-            {ok ? "飲み忘れなし！" : "飲み忘れあり！"}
-          </div>
-          <div style={{ fontSize: 12, color: "#5d7488" }}>
-            {ok
-              ? "この日はぜんぶ飲めました。えらい！"
-              : `${unchecked.join("・")} がまだです`}
-          </div>
-        </div>
-      </div>
     </>
   );
 }
