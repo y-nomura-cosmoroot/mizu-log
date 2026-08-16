@@ -2,7 +2,6 @@
 
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
-import TimeSelector from "../TimeSelector";
 import MedicineMasterCard from "./MedicineMasterCard";
 import TimingCheckRow from "./TimingCheckRow";
 import TimingMasterCard from "./TimingMasterCard";
@@ -20,8 +19,6 @@ export default function MedsTab() {
 
   return (
     <div className={styles.tab}>
-      <TimeSelector />
-
       <div className={styles.headRow}>
         <div className={styles.headLabel}>
           きょうの分{" "}

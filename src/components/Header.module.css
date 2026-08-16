@@ -35,18 +35,26 @@
   letter-spacing: 0.02em;
 }
 
+/* 日付+時間ナビは左寄せ、月ごとに見るは右寄せ */
 .dateRow {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 6px 18px 10px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 18px 10px;
+}
+
+.dateNavGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .navBtn {
   width: 34px;
   height: 34px;
+  flex: none;
   border: none;
   border-radius: var(--r-full);
   background: #fff;
@@ -57,19 +65,15 @@
   cursor: pointer;
 }
 
-/* 「今日に戻る」: 右端に固定（矢印と日付の中央寄せに影響させない）。月ごと表示中は非表示 */
+/* 「今日に戻る」: ブランド行の右端（画面右上）。月ごと表示中は非表示 */
 .todayBtn {
-  position: absolute;
-  right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
   border: none;
   background: #fff;
   color: var(--c-primary-600);
   font-size: var(--fs-11);
   font-weight: var(--fw-bold);
   border-radius: var(--r-pill);
-  padding: 8px 10px;
+  padding: 6px 10px;
   box-shadow: var(--sh-btn-s);
   cursor: pointer;
   white-space: nowrap;
@@ -78,7 +82,7 @@
 .dateWrap {
   position: relative;
   text-align: center;
-  min-width: 110px;
+  min-width: 84px;
   z-index: 20;
 }
 
@@ -99,7 +103,7 @@
   padding: 0 16px 10px;
 }
 
-/* 「月ごとに見る」トグルスイッチ（りれきタブ表示中のみ、ブランド行の右端） */
+/* 「月ごとに見る」トグルスイッチ（りれきタブ表示中のみ、日付ナビ行の右端に表示） */
 .monthlyToggle {
   display: flex;
   align-items: center;
@@ -144,4 +148,164 @@
   font-size: var(--fs-12);
   font-weight: var(--fw-bold);
   color: var(--c-primary-600);
+}
+
+/* ここから⏰記録する時間ナビ（日付ナビの隣に横並び表示。りれきタブでは非表示） */
+.timeNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+.stepBtn {
+  border: none;
+  background: var(--c-primary-100);
+  color: var(--c-primary-600);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-14);
+  border-radius: var(--r-10);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.toggle {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+  color: var(--c-primary-700);
+  background: var(--c-primary-50);
+  border: 1.5px solid var(--c-water-100);
+  border-radius: var(--r-10);
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toggleCaret {
+  font-size: var(--fs-11);
+  color: var(--c-primary-500);
+}
+
+.hourOverlayZ {
+  z-index: 21;
+}
+
+/* dateRow基準の絶対配置。時間ナビ分の帯を含めた日付ナビ行いっぱいに広がる */
+.dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  overflow: hidden;
+  z-index: 22;
+}
+
+.sectionLabel {
+  padding: 10px 16px 6px;
+  font-size: var(--fs-11-5);
+  font-weight: var(--fw-black);
+  color: var(--c-muted-500);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+
+.sectionLabelNext {
+  border-top: 1px solid var(--c-line-soft);
+  background: #fafcfe;
+  padding: 8px 16px 6px;
+}
+
+.hourGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 10px 14px 12px;
+}
+
+.hourGridNext {
+  padding: 10px 14px 14px;
+}
+
+/* 時間チップ。当日側/翌日側は data-side、選択は data-selected で切替 */
+.hourChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  border-radius: var(--r-10);
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  font-size: var(--fs-13-5);
+  font-weight: var(--fw-bold);
+  padding: 7px 12px 6px;
+  cursor: pointer;
+}
+
+.hourChip[data-side="today"] {
+  background: var(--c-primary-100);
+  color: var(--c-primary-700);
+}
+
+.hourChip[data-side="next"] {
+  background: var(--c-surface-dim);
+  color: var(--c-muted-600);
+}
+
+/* 選択はサイド配色より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+.hourChip[data-selected="true"] {
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
+}
+
+/* 現在時刻のチップ（今日を表示中のみ）: 内側リング+「いま」マークで示す */
+.hourChip[data-now="true"] {
+  box-shadow: inset 0 0 0 1.5px var(--c-primary-500);
+}
+
+/* 選択中（青塗り）と重なったときは白リングに切り替えて見えるようにする */
+.hourChip[data-selected="true"][data-now="true"] {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+}
+
+.nowMark {
+  font-size: var(--fs-10);
+  font-weight: var(--fw-black);
+  margin-right: 2px;
+}
+
+/* チップ下の飲水/尿量小計。記録なしでも高さを保つため visibility で隠す */
+.chipTotal {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.chipTotal.isHidden {
+  visibility: hidden;
+}
+
+.totalW {
+  color: var(--c-primary-600);
+}
+
+.totalSlash {
+  color: var(--c-line-slash);
+}
+
+.totalU {
+  color: var(--c-urine-600);
+}
+
+/* 選択中チップは青背景になるため、小計の数字は白系にして視認性を保つ */
+.hourChip[data-selected="true"] .totalW {
+  color: #fff;
+}
+
+.hourChip[data-selected="true"] .totalSlash {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hourChip[data-selected="true"] .totalU {
+  color: rgba(255, 255, 255, 0.8);
 }

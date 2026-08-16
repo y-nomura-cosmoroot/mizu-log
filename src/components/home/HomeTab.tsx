@@ -6,7 +6,6 @@ import { getRecordDate, targetMinute } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { IntakeKind } from "@/types/records";
-import TimeSelector from "../TimeSelector";
 import IntakePanel from "./IntakePanel";
 import MedsAlertBanner from "./MedsAlertBanner";
 import SubtotalBar from "./SubtotalBar";
@@ -39,49 +38,44 @@ export default function HomeTab() {
   };
 
   return (
-    <>
-      <div className={styles.selectorWrap}>
-        <TimeSelector inset />
-      </div>
-      <div className={styles.stage}>
-        <TankBackground waterTotal={waterTotal} urineTotal={urineTotal} />
+    <div className={styles.stage}>
+      <TankBackground waterTotal={waterTotal} urineTotal={urineTotal} />
 
-        {isToday && unchecked.length > 0 && <MedsAlertBanner unchecked={unchecked} />}
+      {isToday && unchecked.length > 0 && <MedsAlertBanner unchecked={unchecked} />}
 
-        <div className={styles.panels}>
-          <IntakePanel
-            kind="water"
-            hourMl={sumForHour(intakes, "water", viewDate, selHour)}
-            dayTotalMl={waterTotal}
-            customMl={customWater}
-            onCustomChange={setCustomWater}
-            onAdd={(ml) => add("water", ml)}
-          />
-          <IntakePanel
-            kind="urine"
-            hourMl={sumForHour(intakes, "urine", viewDate, selHour)}
-            dayTotalMl={urineTotal}
-            customMl={customUrine}
-            onCustomChange={setCustomUrine}
-            onAdd={(ml) => add("urine", ml)}
-          />
-        </div>
-
-        <SubtotalBar
-          waterBands={[
-            sumForBand(intakes, "water", viewDate, 1),
-            sumForBand(intakes, "water", viewDate, 2),
-            sumForBand(intakes, "water", viewDate, 3),
-          ]}
-          urineBands={[
-            sumForBand(intakes, "urine", viewDate, 1),
-            sumForBand(intakes, "urine", viewDate, 2),
-            sumForBand(intakes, "urine", viewDate, 3),
-          ]}
-          waterTotal={waterTotal}
-          urineTotal={urineTotal}
+      <div className={styles.panels}>
+        <IntakePanel
+          kind="water"
+          hourMl={sumForHour(intakes, "water", viewDate, selHour)}
+          dayTotalMl={waterTotal}
+          customMl={customWater}
+          onCustomChange={setCustomWater}
+          onAdd={(ml) => add("water", ml)}
+        />
+        <IntakePanel
+          kind="urine"
+          hourMl={sumForHour(intakes, "urine", viewDate, selHour)}
+          dayTotalMl={urineTotal}
+          customMl={customUrine}
+          onCustomChange={setCustomUrine}
+          onAdd={(ml) => add("urine", ml)}
         />
       </div>
-    </>
+
+      <SubtotalBar
+        waterBands={[
+          sumForBand(intakes, "water", viewDate, 1),
+          sumForBand(intakes, "water", viewDate, 2),
+          sumForBand(intakes, "water", viewDate, 3),
+        ]}
+        urineBands={[
+          sumForBand(intakes, "urine", viewDate, 1),
+          sumForBand(intakes, "urine", viewDate, 2),
+          sumForBand(intakes, "urine", viewDate, 3),
+        ]}
+        waterTotal={waterTotal}
+        urineTotal={urineTotal}
+      />
+    </div>
   );
 }
