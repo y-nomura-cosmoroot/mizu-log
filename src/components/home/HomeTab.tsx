@@ -1,11 +1,13 @@
 "use client";
 
 import { sumForBand, sumForDay, sumForHour } from "@/lib/aggregate";
+import { getIntakeAdviceState } from "@/lib/intakeAdvice";
 import { uncheckedTimings } from "@/lib/meds";
 import { getRecordDate, targetMinute } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { IntakeKind } from "@/types/records";
+import IntakeAdviceBubble from "./IntakeAdviceBubble";
 import IntakePanel from "./IntakePanel";
 import MedsAlertBanner from "./MedsAlertBanner";
 import SubtotalBar from "./SubtotalBar";
@@ -30,6 +32,9 @@ export default function HomeTab() {
   const urineTotal = sumForDay(intakes, "urine", viewDate);
   const unchecked = uncheckedTimings(timings, medChecks, viewDate);
   const isToday = viewDate === getRecordDate(new Date());
+  const adviceState = isToday
+    ? getIntakeAdviceState(intakes, viewDate, waterTotal, new Date())
+    : null;
 
   const add = (kind: IntakeKind, ml: number) => {
     const now = new Date();
@@ -42,6 +47,7 @@ export default function HomeTab() {
       <TankBackground waterTotal={waterTotal} urineTotal={urineTotal} />
 
       {isToday && unchecked.length > 0 && <MedsAlertBanner unchecked={unchecked} />}
+      {adviceState && <IntakeAdviceBubble state={adviceState} />}
 
       <div className={styles.panels}>
         <IntakePanel

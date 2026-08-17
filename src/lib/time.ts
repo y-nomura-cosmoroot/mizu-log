@@ -22,6 +22,13 @@ export function getRecordDate(now: Date): RecordDate {
   return formatCalendarDate(d);
 }
 
+/** 記録日開始(14時)からの経過分。h・mは記録日内の時刻（0〜13時は翌暦日扱いなので+24h側） */
+export function elapsedMinutesInRecordDay(h: number, m: number): number {
+  const startMin = RECORD_DAY_START_HOUR * 60;
+  const rawMin = h * 60 + m;
+  return h >= RECORD_DAY_START_HOUR ? rawMin - startMin : rawMin + (24 * 60 - startMin);
+}
+
 /** 時(0-23)が属する小計帯 */
 export function band(h: number): BandNo {
   if (h >= 14 && h <= 21) return 1;
