@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FlagRecord, IntakeRecord, VitalRecord } from "@/types/records";
 import {
+  barPct,
   buildMonthlySummary,
   countFlags,
   groupIntakesByBandHour,
@@ -76,6 +77,21 @@ describe("sumForBand（帯別小計）", () => {
       sumForBand(intakes, "water", D, 2) +
       sumForBand(intakes, "water", D, 3);
     expect(total).toBe(sumForDay(intakes, "water", D));
+  });
+});
+
+describe("barPct（りれきの横向きバー用の割合）", () => {
+  it("基準値ちょうどで100", () => {
+    expect(barPct(500, 500)).toBe(100);
+  });
+  it("基準値の半分で50", () => {
+    expect(barPct(250, 500)).toBe(50);
+  });
+  it("基準値を超えても100でクランプ", () => {
+    expect(barPct(900, 500)).toBe(100);
+  });
+  it("0以下にはならない", () => {
+    expect(barPct(0, 500)).toBe(0);
   });
 });
 

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { groupIntakesByBandHour, sumForDay } from "@/lib/aggregate";
+import { barPct, groupIntakesByBandHour, sumForDay } from "@/lib/aggregate";
+import { GOAL_ML } from "@/lib/constants";
 import { formatTime } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import AccordionHourRow from "./AccordionHourRow";
+import IntakeBandBar from "./IntakeBandBar";
 import histStyles from "./history.module.css";
 import styles from "./WaterUrineHistory.module.css";
 
@@ -36,8 +38,12 @@ export default function WaterUrineHistory() {
   return (
     <>
       <div className={`card ${styles.totalCard}`}>
-        <b>1日の合計</b>
-        <span className={styles.totalLine}>
+        <div className={styles.totalBarLayer}>
+          <IntakeBandBar pct={barPct(waterTotal, GOAL_ML)} kind="water" />
+          <IntakeBandBar pct={barPct(urineTotal, GOAL_ML)} kind="urine" />
+        </div>
+        <b className={styles.totalCardFront}>1日の合計</b>
+        <span className={`${styles.totalLine} ${styles.totalCardFront}`}>
           飲水{" "}
           <b data-testid="day-total-water" className={styles.totalWater}>
             {waterTotal}
@@ -53,8 +59,12 @@ export default function WaterUrineHistory() {
       {bands.map((b) => (
         <div key={b.band} className="card">
           <div className={`${histStyles.bandHeader} ${histStyles.bandHeaderSplit}`}>
-            <b>{b.label}</b>
-            <span className={styles.subtotalRow}>
+            <div className={styles.bandBarLayer}>
+              <IntakeBandBar pct={barPct(b.waterSum, GOAL_ML)} kind="water" />
+              <IntakeBandBar pct={barPct(b.urineSum, GOAL_ML)} kind="urine" />
+            </div>
+            <b className={styles.bandHeaderFront}>{b.label}</b>
+            <span className={`${styles.subtotalRow} ${styles.bandHeaderFront}`}>
               小計
               <span className="badge-water">飲水</span>
               <b data-testid={`band-w${b.band}`} className={styles.sumWater}>

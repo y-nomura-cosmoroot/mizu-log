@@ -1,4 +1,6 @@
 .row {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -15,6 +17,20 @@
 /* 記録がない日は行ごと薄くする */
 .row.isEmpty {
   background: var(--c-surface-row);
+}
+
+/* 行の背景に敷く飲水/尿量バーのレイヤー（日の合計を基準） */
+.barLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* barLayer の上に乗せる前景 */
+.front {
+  position: relative;
+  z-index: 1;
 }
 
 .dayCol {

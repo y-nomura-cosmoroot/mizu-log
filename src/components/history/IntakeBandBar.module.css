@@ -1,0 +1,73 @@
+/* 帯・時間の目安に対する割合(%)ぶん左から塗る横向きバー。色・波はこのファイル限定のワンオフ。
+   水面の境界は作らず、塗りつぶしの淡いハイライト帯2枚を上下から重ねて揺らめかせる
+   （ホームのタンクと同じ「塗りつぶし」ベースの波。線(stroke)だと生き物のように見えて不自然だったため不採用） */
+.bar {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: var(--bar-w);
+  transition: width 0.4s ease;
+  opacity: 0.45;
+}
+
+.bar[data-kind="water"] {
+  background: linear-gradient(180deg, #a5d8f5, #4aa0dc);
+}
+
+.bar[data-kind="urine"] {
+  background: linear-gradient(180deg, #f4cf83, #e0a53f);
+}
+
+.textureWrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wave {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.wave path {
+  fill: rgba(255, 255, 255, 0.2);
+}
+
+.waveTop {
+  animation: bandwavetop 9s linear infinite;
+}
+
+.waveBottom {
+  animation: bandwavebottom 12.5s linear infinite reverse;
+}
+
+.bar[data-kind="urine"] .waveTop {
+  animation-direction: reverse;
+}
+
+.bar[data-kind="urine"] .waveBottom {
+  animation-direction: normal;
+}
+
+@keyframes bandwavetop {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-108px);
+  }
+}
+
+@keyframes bandwavebottom {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-134px);
+  }
+}

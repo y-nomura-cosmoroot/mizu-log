@@ -29,6 +29,20 @@
   align-items: center;
 }
 
+/* 帯見出しの背景に敷く飲水/尿量バーのレイヤー */
+.bandBarLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* bandBarLayer の上に乗せる前景（見出しラベル・小計） */
+.bandHeaderFront {
+  position: relative;
+  z-index: 1;
+}
+
 /* 個別記録行の水分/尿固有部分（共通は history.module.css の itemRow） */
 .row {
   gap: 10px;
@@ -56,11 +70,27 @@
 
 /* 1日の合計カード（card グローバルに padding 等を上書き） */
 .totalCard {
+  position: relative;
+  overflow: hidden;
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: var(--fs-13);
+}
+
+/* 1日の合計カードの背景に敷く飲水/尿量バーのレイヤー */
+.totalBarLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* totalBarLayer の上に乗せる前景（見出し・数値） */
+.totalCardFront {
+  position: relative;
+  z-index: 1;
 }
 
 .totalLine {

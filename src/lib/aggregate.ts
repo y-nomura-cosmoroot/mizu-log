@@ -45,6 +45,11 @@ export function sumForDay(
     .reduce((a, x) => a + x.ml, 0);
 }
 
+/** りれきの飲水/尿量バー用: 基準値に対する割合(%)。0〜100にクランプ */
+export function barPct(ml: number, targetMl: number): number {
+  return Math.max(0, Math.min(100, (ml / targetMl) * 100));
+}
+
 export interface IntakeHourGroup {
   hour: number;
   waterSum: number;

@@ -1,10 +1,12 @@
 "use client";
 
-import { buildMonthlySummary } from "@/lib/aggregate";
+import { barPct, buildMonthlySummary } from "@/lib/aggregate";
 import { ymOf } from "@/lib/calendar";
+import { GOAL_ML } from "@/lib/constants";
 import { getRecordDate, weekdayOf } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
+import IntakeBandBar from "./IntakeBandBar";
 import styles from "./MonthlyHistory.module.css";
 
 /** 「月ごとに見る」ON時の一覧。月の各日を1行にして飲水/尿・便・食事・飲み忘れを並べる */
@@ -52,11 +54,15 @@ export default function MonthlyHistory() {
           onClick={() => openDay(d.date)}
           className={`${styles.row} ${d.hasRecords ? "" : styles.isEmpty}`}
         >
-          <div className={styles.dayCol}>
+          <div className={styles.barLayer}>
+            <IntakeBandBar pct={barPct(d.waterMl, GOAL_ML)} kind="water" />
+            <IntakeBandBar pct={barPct(d.urineMl, GOAL_ML)} kind="urine" />
+          </div>
+          <div className={`${styles.dayCol} ${styles.front}`}>
             <span className={styles.dayNum}>{d.day}</span>
             <span className={styles.dayMeta}>{weekdayOf(d.date)}</span>
           </div>
-          <div className={styles.content}>
+          <div className={`${styles.content} ${styles.front}`}>
             {d.hasRecords ? (
               <>
                 <span>
@@ -94,7 +100,7 @@ export default function MonthlyHistory() {
               <span className={styles.empty}>記録なし</span>
             )}
           </div>
-          {d.medsMissed && <span className={styles.alert}>⚠️</span>}
+          {d.medsMissed && <span className={`${styles.alert} ${styles.front}`}>⚠️</span>}
         </div>
       ))}
     </div>

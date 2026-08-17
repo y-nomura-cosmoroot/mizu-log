@@ -2,9 +2,11 @@
 
 /* 帯（8時間区切り）の見出し行 */
 .bandHeader {
+  position: relative;
   padding: 10px 16px;
   background: var(--c-surface-band);
   font-size: var(--fs-13);
+  overflow: hidden;
 }
 
 /* 左右に割り付ける帯見出し（水分/尿の小計表示用） */
