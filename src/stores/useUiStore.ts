@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { IntakeKind, RecordDate } from "@/types/records";
+import type { IntakeKind, Medicine, RecordDate } from "@/types/records";
 import { addMonthsFirst, ymKey } from "@/lib/calendar";
 import { DEFAULT_CUSTOM_ML, TOAST_MS } from "@/lib/constants";
 import { addDays, getRecordDate, HOUR_CYCLE } from "@/lib/time";
@@ -12,6 +12,22 @@ export type SheetState =
   | { type: "ml"; id: string; kind: IntakeKind; ml: number }
   | ({ type: "vital"; id: string } & VitalInput)
   | null;
+
+/** おくすりマスタの下書き行(まだstoreには追加していない、確定前の1件分) */
+export type MedicineDraft = Pick<Medicine, "name" | "doseAmount" | "doseUnit">;
+
+/**
+ * 「📷 カメラからおくすりを追加」シートの状態。
+ * 1枚の写真から複数の薬が読み取れることがあるため、draftsは配列(「これでOK」を押すまでstoreには反映しない)
+ */
+export type CameraSheetState = {
+  status: "camera" | "recognizing" | "done" | "error";
+  /** status==="camera"のときのライブカメラ起動状況 */
+  cameraPhase: "starting" | "live" | "unavailable";
+  imageUrl: string | null;
+  drafts: MedicineDraft[];
+  errorMsg?: string;
+} | null;
 
 const TABS: Tab[] = ["home", "input", "meds", "history"];
 const SUBS: HistSub[] = ["water", "vital", "meds"];
@@ -36,6 +52,7 @@ interface UiStore {
   calYM: number | null;
   toast: string | null;
   sheet: SheetState;
+  cameraSheet: CameraSheetState;
   medsMasterMode: boolean;
   customWater: number;
   customUrine: number;
@@ -64,6 +81,9 @@ interface UiStore {
   openSheet: (sheet: Exclude<SheetState, null>) => void;
   patchSheet: (patch: Partial<Exclude<SheetState, null>>) => void;
   closeSheet: () => void;
+  openCameraSheet: () => void;
+  patchCameraSheet: (patch: Partial<Exclude<CameraSheetState, null>>) => void;
+  closeCameraSheet: () => void;
   setMedsMasterMode: (v: boolean) => void;
   setCustomWater: (v: number) => void;
   setCustomUrine: (v: number) => void;
@@ -92,6 +112,7 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   calYM: null,
   toast: null,
   sheet: null,
+  cameraSheet: null,
   medsMasterMode: false,
   customWater: DEFAULT_CUSTOM_ML,
   customUrine: DEFAULT_CUSTOM_ML,
@@ -162,6 +183,14 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   patchSheet: (patch) =>
     set((s) => (s.sheet ? { sheet: { ...s.sheet, ...patch } as SheetState } : s)),
   closeSheet: () => set({ sheet: null }),
+  openCameraSheet: () =>
+    set({
+      sheet: null,
+      cameraSheet: { status: "camera", cameraPhase: "starting", imageUrl: null, drafts: [] },
+    }),
+  patchCameraSheet: (patch) =>
+    set((s) => (s.cameraSheet ? { cameraSheet: { ...s.cameraSheet, ...patch } } : s)),
+  closeCameraSheet: () => set({ cameraSheet: null }),
   setMedsMasterMode: (v) => set({ medsMasterMode: v }),
   setCustomWater: (v) => set({ customWater: v }),
   setCustomUrine: (v) => set({ customUrine: v }),

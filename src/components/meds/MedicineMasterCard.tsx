@@ -1,10 +1,9 @@
 "use client";
 
-import { DOSE_UNITS } from "@/lib/constants";
 import { sortMedicines } from "@/lib/meds";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
-import type { DoseUnit } from "@/types/records";
+import MedicineFieldRow from "./MedicineFieldRow";
 import medsStyles from "./meds.module.css";
 import styles from "./MedicineMasterCard.module.css";
 
@@ -17,6 +16,7 @@ export default function MedicineMasterCard() {
   const toggleMedicineTiming = useAppStore((s) => s.toggleMedicineTiming);
   const movedMedId = useUiStore((s) => s.movedMedId);
   const markMovedMed = useUiStore((s) => s.markMovedMed);
+  const openCameraSheet = useUiStore((s) => s.openCameraSheet);
 
   const sorted = sortMedicines(medicines, timings);
 
@@ -29,46 +29,17 @@ export default function MedicineMasterCard() {
           data-testid={`med-card-${i}`}
           className={`${styles.medCard} ${m.id === movedMedId ? medsStyles.isMoved : ""}`}
         >
-          <div className={styles.fieldRow}>
-            <input
-              data-testid={`med-name-${i}`}
-              value={m.name}
-              onChange={(e) => updateMedicine(m.id, { name: e.target.value })}
-              placeholder="くすりの名前"
-              className={`${styles.medInput} ${styles.nameInput}`}
-            />
-            <input
-              data-testid={`med-dose-${i}`}
-              type="number"
-              min={0}
-              value={m.doseAmount}
-              onChange={(e) => updateMedicine(m.id, { doseAmount: e.target.value })}
-              inputMode="decimal"
-              placeholder="量"
-              className={`${styles.medInput} ${styles.doseInput}`}
-            />
-            <select
-              data-testid={`med-unit-${i}`}
-              value={m.doseUnit}
-              onChange={(e) =>
-                updateMedicine(m.id, { doseUnit: e.target.value as DoseUnit })
-              }
-              className={`${styles.medInput} ${styles.unitSelect}`}
-            >
-              {DOSE_UNITS.map((u) => (
-                <option key={u} value={u}>
-                  {u}
-                </option>
-              ))}
-            </select>
-            <button
-              data-testid={`med-del-${i}`}
-              onClick={() => deleteMedicine(m.id)}
-              className={`btn-del ${styles.delBtn}`}
-            >
-              けす
-            </button>
-          </div>
+          <MedicineFieldRow
+            testIdPrefix="med"
+            index={i}
+            name={m.name}
+            doseAmount={m.doseAmount}
+            doseUnit={m.doseUnit}
+            onChangeName={(v) => updateMedicine(m.id, { name: v })}
+            onChangeDoseAmount={(v) => updateMedicine(m.id, { doseAmount: v })}
+            onChangeDoseUnit={(v) => updateMedicine(m.id, { doseUnit: v })}
+            onDelete={() => deleteMedicine(m.id)}
+          />
           <div className={styles.tagRow}>
             {timings.map((t) => {
               const on = m.timings.includes(t);
@@ -95,6 +66,13 @@ export default function MedicineMasterCard() {
         className={styles.addMedBtn}
       >
         ＋ おくすりを追加
+      </button>
+      <button
+        data-testid="add-medicine-camera"
+        onClick={openCameraSheet}
+        className={styles.cameraAddBtn}
+      >
+        📷 カメラからおくすりを追加
       </button>
     </div>
   );

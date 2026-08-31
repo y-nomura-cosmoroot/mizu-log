@@ -3,6 +3,7 @@
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import styles from "./EditSheet.module.css";
+import sheetStyles from "./sheets.module.css";
 
 const TEMP_OPTIONS: string[] = [];
 for (let t = 340; t <= 410; t++) TEMP_OPTIONS.push((t / 10).toFixed(1));
@@ -44,10 +45,10 @@ export default function EditSheet() {
       <div
         data-testid="sheet-overlay"
         onClick={closeSheet}
-        className={`overlay ${styles.overlay}`}
+        className={`overlay ${sheetStyles.overlay}`}
       />
-      <div data-testid="edit-sheet" className={styles.sheet}>
-        <div className={styles.title}>{title}</div>
+      <div data-testid="edit-sheet" className={sheetStyles.sheet}>
+        <div className={sheetStyles.title}>{title}</div>
 
         {sheet.type === "ml" && (
           <div className={styles.mlRow}>
@@ -146,11 +147,11 @@ export default function EditSheet() {
           </div>
         )}
 
-        <div className={styles.footRow}>
-          <button data-testid="sheet-cancel" onClick={closeSheet} className={styles.cancelBtn}>
+        <div className={sheetStyles.footRow}>
+          <button data-testid="sheet-cancel" onClick={closeSheet} className={sheetStyles.cancelBtn}>
             やめる
           </button>
-          <button data-testid="sheet-save" onClick={save} className={styles.saveBtn}>
+          <button data-testid="sheet-save" onClick={save} className={sheetStyles.saveBtn}>
             これでOK
           </button>
         </div>

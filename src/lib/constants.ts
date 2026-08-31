@@ -19,6 +19,9 @@ export const DEFAULT_TIMINGS = ["朝", "昼", "晩"];
 /** 薬の量の単位の選択肢 */
 export const DOSE_UNITS = ["錠", "袋", "mg", "g"] as const;
 
+/** カメラ撮影OCR(Groq Vision APIサーバー側プロキシ)のエンドポイント */
+export const OCR_API_PATH = "/api/ocr";
+
 /** 体重エフェクト: この値以下でシルエットが最も細くなる(kg) */
 export const WEIGHT_SLIM_KG = 40;
 

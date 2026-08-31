@@ -44,6 +44,7 @@ interface AppStore extends AppData {
   moveTiming: (index: number, delta: number) => void;
 
   addMedicine: () => void;
+  addMedicineWithName: (draft: Pick<Medicine, "name" | "doseAmount" | "doseUnit">) => void;
   updateMedicine: (
     id: string,
     patch: Partial<Pick<Medicine, "name" | "doseAmount" | "doseUnit">>
@@ -152,6 +153,10 @@ export const useAppStore = create<AppStore>()(
             ...s.medicines,
             { id: newId(), name: "", doseAmount: "", doseUnit: "錠", timings: [] },
           ],
+        })),
+      addMedicineWithName: (draft) =>
+        set((s) => ({
+          medicines: [...s.medicines, { id: newId(), ...draft, timings: [] }],
         })),
       updateMedicine: (id, patch) =>
         set((s) => ({

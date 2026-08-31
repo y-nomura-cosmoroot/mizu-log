@@ -11,6 +11,8 @@ import InputTab from "./input/InputTab";
 import MedsTab from "./meds/MedsTab";
 import HistoryTab from "./history/HistoryTab";
 import EditSheet from "./sheets/EditSheet";
+import CameraAddMedicineSheet from "./sheets/CameraAddMedicineSheet";
+import DrugNameDatalist from "./meds/DrugNameDatalist";
 import styles from "./AppShell.module.css";
 
 export default function AppShell() {
@@ -33,6 +35,8 @@ export default function AppShell() {
           {tab === "meds" && <MedsTab />}
           {tab === "history" && <HistoryTab />}
           <EditSheet />
+          <CameraAddMedicineSheet />
+          <DrugNameDatalist />
           <Toast />
           <BottomNav />
         </>

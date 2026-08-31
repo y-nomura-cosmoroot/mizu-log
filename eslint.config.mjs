@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".next-e2e/**",
     // Claude Design のデザインモック（実装対象外の参照資料）
     "design/**",
+    // ビルド/セットアップ用の素のNode CJSスクリプト（アプリコードのTS/ESM規約対象外）
+    "scripts/**",
   ]),
 ]);
 

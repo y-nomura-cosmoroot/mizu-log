@@ -1,0 +1,60 @@
+.overlay {
+  background: rgba(20, 50, 70, 0.35);
+  z-index: 40;
+}
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 26px;
+  z-index: 41;
+  box-shadow: var(--sh-sheet);
+}
+
+.title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+  padding-bottom: 12px;
+}
+
+/* フッターのボタン行。灰ボタンの色はこのシート限定のワンオフ */
+.footRow {
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.cancelBtn {
+  flex: 1;
+  border: none;
+  background: #eef2f5;
+  color: #5c6f7d;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+  border-radius: var(--r-14);
+  padding: 13px 0;
+  cursor: pointer;
+}
+
+.saveBtn {
+  flex: 2;
+  border: none;
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+  border-radius: var(--r-14);
+  padding: 13px 0;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
