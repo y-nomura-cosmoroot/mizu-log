@@ -39,7 +39,7 @@ export default function TimingCheckRow({ timing }: { timing: string }) {
           </span>
         </div>
         <div className={styles.meds}>
-          <MedDoseList medicines={medicines} timing={timing} size="sm" />
+          <MedDoseList medicines={medicines} timing={timing} size="sm" layout="stacked" />
         </div>
       </div>
       {!checked && (
