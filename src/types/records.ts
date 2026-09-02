@@ -1,4 +1,4 @@
-export type RecordDate = string; // 'YYYY-MM-DD' 14時起点の「記録日」
+export type RecordDate = string; // 'YYYY-MM-DD' の「記録日」（暦日。0:00〜23:59 が1日）
 
 export type IntakeKind = "water" | "urine";
 
@@ -6,7 +6,7 @@ export type IntakeKind = "water" | "urine";
 export interface IntakeRecord {
   id: string;
   kind: IntakeKind;
-  /** 'YYYY-MM-DDTHH:mm' ローカルnaive ISO（これが正）。0〜13時は記録日の翌暦日になる */
+  /** 'YYYY-MM-DDTHH:mm' ローカルnaive ISO（これが正）。暦日部分は recordDate と常に一致する */
   recordedAt: string;
   /** recordedAt から導出した記録日（集計キーとしての派生キャッシュ） */
   recordDate: RecordDate;
@@ -35,8 +35,21 @@ export interface FlagRecord {
   recordDate: RecordDate;
 }
 
-/** 内服チェック実績: 記録日 × タイミング名 → チェック時に選択していた時(0-23) */
+/** 内服チェック実績: 記録日(暦日) × タイミング名 → チェック時に選択していた時(0-23) */
 export type MedChecks = Record<RecordDate, Record<string, number>>;
+
+/** 曜日。Date#getDay と同じ索引（0=日, 1=月, …, 6=土） */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * 内服タイミングのマスタ1件。name が他データとの結合キー
+ * （medChecks のキー・Medicine.timings・movedTiming・testid）。
+ * weekdays は飲む曜日（昇順・重複なし・空にしない。旧データ/新規は全曜日）
+ */
+export interface Timing {
+  name: string;
+  weekdays: Weekday[];
+}
 
 /** 薬の量の単位 */
 export type DoseUnit = "錠" | "袋" | "mg" | "g";
@@ -48,6 +61,7 @@ export interface Medicine {
   /** 量の数値（number inputの値。""=未入力） */
   doseAmount: string;
   doseUnit: DoseUnit;
+  /** 紐づくタイミング名 */
   timings: string[];
 }
 
@@ -57,6 +71,6 @@ export interface AppData {
   vitals: VitalRecord[];
   flags: FlagRecord[];
   medChecks: MedChecks;
-  timings: string[];
+  timings: Timing[];
   medicines: Medicine[];
 }

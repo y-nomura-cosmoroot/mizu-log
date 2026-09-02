@@ -2,7 +2,7 @@
 
 import { sumForHour } from "@/lib/aggregate";
 import { formatCalendarLabel, ymOf } from "@/lib/calendar";
-import { addDays, formatDateLabel, getRecordDate, HOUR_CYCLE } from "@/lib/time";
+import { formatDateLabel, getRecordDate, HOURS } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore, type HistSub } from "@/stores/useUiStore";
 import CalendarPopup from "./CalendarPopup";
@@ -47,10 +47,8 @@ export default function Header() {
   const now = new Date();
   const isToday = viewDate === getRecordDate(now);
   const nowHour = now.getHours();
-  const todayHours = HOUR_CYCLE.slice(0, 10); // 14〜23時
-  const nextHours = HOUR_CYCLE.slice(10); // 翌0〜13時
 
-  const hourChip = (h: number, isTodaySide: boolean) => {
+  const hourChip = (h: number) => {
     const waterSum = sumForHour(intakes, "water", viewDate, h);
     const urineSum = sumForHour(intakes, "urine", viewDate, h);
     const hasTotal = waterSum > 0 || urineSum > 0;
@@ -60,7 +58,6 @@ export default function Header() {
         key={h}
         data-testid={`hour-chip-${h}`}
         data-selected={h === selHour}
-        data-side={isTodaySide ? "today" : "next"}
         data-now={isNow}
         onClick={() => setSelHour(h)}
         className={styles.hourChip}
@@ -173,20 +170,13 @@ export default function Header() {
               onClick={() => setHourDropOpen(false)}
               className={`overlay ${styles.hourOverlayZ}`}
             />
+            {/* 記録日=暦日なので 0〜23時 の1ブロック（4列×6行 = 小計帯ごとに2行） */}
             <div data-testid="hour-dropdown" className={`popover ${styles.dropdown}`}>
               <div className={styles.sectionLabel}>
                 {formatDateLabel(viewDate)}
                 {isToday ? " きょう" : ""}
               </div>
-              <div className={styles.hourGrid}>
-                {todayHours.map((h) => hourChip(h, true))}
-              </div>
-              <div className={`${styles.sectionLabel} ${styles.sectionLabelNext}`}>
-                {formatDateLabel(addDays(viewDate, 1))} よくじつ
-              </div>
-              <div className={`${styles.hourGrid} ${styles.hourGridNext}`}>
-                {nextHours.map((h) => hourChip(h, false))}
-              </div>
+              <div className={styles.hourGrid}>{HOURS.map((h) => hourChip(h))}</div>
             </div>
           </>
         )}

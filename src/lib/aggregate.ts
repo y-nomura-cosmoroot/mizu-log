@@ -5,11 +5,12 @@ import type {
   IntakeRecord,
   MedChecks,
   RecordDate,
+  Timing,
   VitalRecord,
 } from "@/types/records";
 import { BAND_DEFS, type BandNo } from "./constants";
 import { uncheckedTimings } from "./meds";
-import { band, formatCalendarDate, hourOf, hourOrder, minuteOf } from "./time";
+import { band, formatCalendarDate, hourOf, minuteOf } from "./time";
 
 export function sumForHour(
   intakes: IntakeRecord[],
@@ -75,7 +76,7 @@ export function groupIntakesByBandHour(
   return BAND_DEFS.map(({ band: bn, label }) => {
     const bandItems = dayItems.filter((x) => band(hourOf(x.recordedAt)) === bn);
     const hours = [...new Set(bandItems.map((x) => hourOf(x.recordedAt)))].sort(
-      (a, b) => hourOrder(a) - hourOrder(b)
+      (a, b) => a - b
     );
     return {
       band: bn,
@@ -176,7 +177,7 @@ export function groupVitalEntriesByBandHour(
         ...bandVitals.map((v) => hourOf(v.recordedAt)),
         ...bandFlags.map((f) => hourOf(f.recordedAt)),
       ]),
-    ].sort((a, b) => hourOrder(a) - hourOrder(b));
+    ].sort((a, b) => a - b);
     return {
       band: bn,
       label,
@@ -220,7 +221,10 @@ export interface MonthlyDaySummary {
   mealCount: number;
   /** 何かしらの記録（飲水/尿・バイタル・便食事・内服チェック）がある日か */
   hasRecords: boolean;
-  /** 飲み忘れ表示。記録がない日は判定しない（アプリ利用前の日が全部⚠️になるのを防ぐ） */
+  /**
+   * 飲み忘れ表示。記録がない日は判定しない（アプリ利用前の日が全部⚠️になるのを防ぐ）。
+   * その日の曜日に飲む対象のタイミングだけ判定する（対象が無い日は⚠️にならない）
+   */
   medsMissed: boolean;
 }
 
@@ -233,7 +237,7 @@ export function buildMonthlySummary(
   vitals: VitalRecord[],
   flags: FlagRecord[],
   medChecks: MedChecks,
-  timings: string[],
+  timings: Timing[],
   year: number,
   month0: number,
   todayRecordDate: RecordDate

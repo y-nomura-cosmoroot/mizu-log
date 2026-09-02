@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { groupMedChecksByBandHour, uncheckedTimings } from "@/lib/meds";
+import { activeTimings, groupMedChecksByBandHour, uncheckedTimings } from "@/lib/meds";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import AccordionHourRow from "./AccordionHourRow";
@@ -19,18 +19,22 @@ export default function MedsHistory() {
   const bands = groupMedChecksByBandHour(timings, medChecks, viewDate);
   const unchecked = uncheckedTimings(timings, medChecks, viewDate);
   const ok = unchecked.length === 0;
+  // その日の曜日に飲むタイミングが1つも無い日は「ぜんぶ飲めました」ではなく「のむおくすりの ない日」
+  const noneToday = activeTimings(timings, viewDate).length === 0;
 
   return (
     <>
       <div data-testid="meds-result-card" data-ok={ok} className={styles.resultCard}>
-        <span className={styles.resultIcon}>{ok ? "🎉" : "⚠️"}</span>
+        <span className={styles.resultIcon}>{ok ? (noneToday ? "🗓" : "🎉") : "⚠️"}</span>
         <div className={styles.resultBody}>
           <div className={styles.resultTitle}>
-            {ok ? "飲み忘れなし！" : "飲み忘れあり！"}
+            {ok ? (noneToday ? "のむおくすりの ない日" : "飲み忘れなし！") : "飲み忘れあり！"}
           </div>
           <div className={styles.resultSub}>
             {ok
-              ? "この日はぜんぶ飲めました。えらい！"
+              ? noneToday
+                ? "この日は のむおくすりが ありません"
+                : "この日はぜんぶ飲めました。えらい！"
               : `${unchecked.join("・")} がまだです`}
           </div>
         </div>

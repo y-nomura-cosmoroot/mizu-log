@@ -208,24 +208,14 @@
   border-bottom: 1px solid var(--c-line-soft);
 }
 
-.sectionLabelNext {
-  border-top: 1px solid var(--c-line-soft);
-  background: #fafcfe;
-  padding: 8px 16px 6px;
-}
-
 .hourGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
-  padding: 10px 14px 12px;
-}
-
-.hourGridNext {
   padding: 10px 14px 14px;
 }
 
-/* 時間チップ。当日側/翌日側は data-side、選択は data-selected で切替 */
+/* 時間チップ（0〜23時の1ブロック）。選択は data-selected、現在時刻は data-now で切替 */
 .hourChip {
   display: flex;
   flex-direction: column;
@@ -239,19 +229,11 @@
   font-weight: var(--fw-bold);
   padding: 7px 12px 6px;
   cursor: pointer;
-}
-
-.hourChip[data-side="today"] {
   background: var(--c-primary-100);
   color: var(--c-primary-700);
 }
 
-.hourChip[data-side="next"] {
-  background: var(--c-surface-dim);
-  color: var(--c-muted-600);
-}
-
-/* 選択はサイド配色より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+/* 選択は基本配色より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
 .hourChip[data-selected="true"] {
   background: var(--c-primary-500);
   color: #fff;

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { IntakeKind, Medicine, RecordDate } from "@/types/records";
 import { addMonthsFirst, ymKey } from "@/lib/calendar";
 import { DEFAULT_CUSTOM_ML, TOAST_MS } from "@/lib/constants";
-import { addDays, getRecordDate, HOUR_CYCLE } from "@/lib/time";
+import { addDays, getRecordDate } from "@/lib/time";
 import type { VitalInput } from "./useAppStore";
 
 export type Tab = "home" | "input" | "meds" | "history";
@@ -45,6 +45,8 @@ interface UiStore {
   /** りれきタブの「月ごとに見る」トグル */
   histMonthly: boolean;
   viewDate: RecordDate;
+  /** 起動時(または最後の syncDay)に計算した「今日」の記録日。日付跨ぎの検知に使う */
+  todayKey: RecordDate;
   selHour: number;
   hourDropOpen: boolean;
   calOpen: boolean;
@@ -64,6 +66,12 @@ interface UiStore {
 
   /** 初回マウント時: URLと現在時刻からUI状態を初期化 */
   init: (now: Date) => void;
+  /**
+   * 日付が変わっていたら「今日」を更新する（表示復帰時・1分ごとに呼ぶ）。
+   * 旧「今日」を表示中なら表示日と時刻も新しい今日へ追従させる（開いたまま0時を跨いだ端末が
+   * 前日に記録し続けないため）。過去日を見ているときは表示を動かさない
+   */
+  syncDay: (now: Date) => void;
   setTab: (tab: Tab) => void;
   setHistSub: (sub: HistSub) => void;
   setHistMonthly: (v: boolean) => void;
@@ -106,7 +114,8 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   histSub: "water",
   histMonthly: false,
   viewDate: "",
-  selHour: 14,
+  todayKey: "",
+  selHour: 0,
   hourDropOpen: false,
   calOpen: false,
   calYM: null,
@@ -136,9 +145,18 @@ export const useUiStore = create<UiStore>()((set, get) => ({
       tab,
       histSub,
       viewDate: getRecordDate(now),
+      todayKey: getRecordDate(now),
       selHour: now.getHours(),
     });
   },
+  syncDay: (now) =>
+    set((s) => {
+      const today = getRecordDate(now);
+      if (today === s.todayKey) return s;
+      return s.viewDate === s.todayKey
+        ? { todayKey: today, viewDate: today, selHour: now.getHours(), calYM: null }
+        : { todayKey: today };
+    }),
   setTab: (tab) => {
     set({ tab, medsMasterMode: false, hourDropOpen: false, calOpen: false });
     writeUrl(tab, get().histSub);
@@ -166,11 +184,7 @@ export const useUiStore = create<UiStore>()((set, get) => ({
     }),
   setViewDate: (date) => set({ viewDate: date, calOpen: false, calYM: null }),
   setSelHour: (h) => set({ selHour: h, hourDropOpen: false }),
-  stepSelHour: (delta) =>
-    set((s) => {
-      const i = Math.max(0, HOUR_CYCLE.indexOf(s.selHour));
-      return { selHour: HOUR_CYCLE[(i + delta + 24) % 24] };
-    }),
+  stepSelHour: (delta) => set((s) => ({ selHour: (s.selHour + delta + 24) % 24 })),
   setHourDropOpen: (v) => set({ hourDropOpen: v }),
   setCalOpen: (v) => set({ calOpen: v, calYM: null }),
   setCalYM: (ym) => set({ calYM: ym }),

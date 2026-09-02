@@ -5,13 +5,20 @@
   gap: 8px;
 }
 
+/* 2段ブロック: 1段目 = ≡ 名前 ↑↓ けす、2段目 = 曜日チップ */
 .row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   background: var(--c-surface-soft);
   border-radius: var(--r-12);
   padding: 9px 12px;
+}
+
+.rowMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .handle {
@@ -42,6 +49,38 @@
   padding: 5px 10px;
   cursor: pointer;
   font-size: var(--fs-12);
+}
+
+/* 曜日チップ（月→日）。行内幅 338px（430 − 16×2 − 18×2 − 12×2）÷ 7 ≈ 44px、1文字ラベルなので折り返さない */
+.weekdayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekdayChip {
+  border: 1.5px solid transparent; /* ON/OFF で高さを揃えるため両状態とも枠を持つ */
+  border-radius: var(--r-pill);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 0;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+}
+
+/* 配色は薬タグ（MedicineMasterCard の tagOn/tagOff）と同じ */
+.weekdayChip[data-on="false"] {
+  background: #fff;
+  border-color: var(--c-line-input);
+  color: var(--c-muted-500);
+}
+
+/* ON は OFF より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+.weekdayChip[data-on="true"] {
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
 }
 
 .addRow {

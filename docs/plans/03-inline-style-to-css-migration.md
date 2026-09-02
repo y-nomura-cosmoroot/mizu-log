@@ -53,18 +53,19 @@ projects: [
 ```
 
 - 分離は**プロジェクト分割**（--grep はタイトル依存で壊れやすい）。webServer は共有（1回のビルドで両方実行可）
-- ベースラインPNGは `e2e/__screenshots__/visual.spec.ts/*.png`（20枚・gitignore対象外。コミットするかは P9 でユーザ判断）
+- ベースラインPNGは `e2e/__screenshots__/visual.spec.ts/*.png`（21枚・gitignore対象外。コミットするかは P9 でユーザ判断）
 
 ### e2e/visual-helpers.ts（新規）: localStorage 直接注入
 
-- `SEED`: `{state: AppData, version: 2}` エンベロープ（形式の正は `useAppStore.ts` の partialize）
-  - intakes: 帯1/帯2/帯3(翌暦日 `2026-08-15T06:00`)+前日分（カレンダー非選択日の合計表示用）
+- `SEED`: `{state: AppData, version: 3}` エンベロープ（形式の正は `useAppStore.ts` の partialize、version は `PERSIST_VERSION`。2026-09 の暦日化で 2→3）
+  - intakes: 帯1(vw4 `2026-08-14T06:00`)/帯2/帯3 — 記録日=暦日なので全部同一暦日 +前日分（カレンダー非選択日の合計表示用）
   - vitals: 全エフェクト同時発火（temp 38.5 / bp 150/95 / pulse 120 / weight 70）+ 部分記録1件（サマリ統合表示）
   - flags: 便・食事各1、medChecks: 朝のみ済（未チェック行+飲み忘れバナー表示）、medicines: 用量あり2種+未入力1種
+  - timings: `{name, weekdays}` オブジェクト（ねる前は `[1,3,5]` で OFF チップを撮る。T0 の 8/14 は金曜なので有効・進捗 1/4 は不変）
 - `ALL_CHECKED_SEED`: 全タイミング済（🎉カード用）
-- `openSeeded(page, path, seed)`: `addInitScript` で注入 → `openApp`（clock固定 2026-08-14T15:00+09:00）→ `document.fonts.ready` 待ち
+- `openSeeded(page, path, seed)`: `addInitScript` で注入 → `openApp`（clock固定 2026-08-14T15:00+09:00）→ `document.fonts.ready` 待ち。`Math.random = () => 0` も init script で固定する（助言バブルの文言がランダムで home-empty 等が揺れるのを防ぐ）
 
-### e2e/visual.spec.ts（新規）: 20ショット
+### e2e/visual.spec.ts（新規）: 21ショット
 
 | ショット | 内容 | 撮り方 |
 |---|---|---|
@@ -77,9 +78,11 @@ projects: [
 | history-water / history-water-open | 履歴水分 / 時間行アコーディオン展開 | fullPage |
 | history-vital-open / history-vital-empty | 履歴バイタル展開 / 空 | fullPage |
 | history-meds-ng / history-meds-ok | 飲み忘れあり(展開) / なし(ALL_CHECKED) | fullPage |
+| history-monthly | 月ごとに見る（日別集計一覧、後日追加） | fullPage |
 | edit-sheet-ml / edit-sheet-vital | なおすシート(ml / バイタル) | viewport |
 
 - fullPage 標準（コンテンツが940px超）。fixedオーバーレイが主役の sheet/toast のみ viewport
+- **2026-09 の暦日化・曜日チップ追加で全ショットのベースラインを更新**（意図した見た目の変更: 帯ラベル・時刻ドロップダウン1ブロック・マスタの曜日チップ。input-* 5枚は差分なしがサニティ）
 - カバレッジ: 26ファイル全部、FEVER_CHIP4値、data-ok両分岐、カレンダー5分岐、chipOn/Off、BottomNav各状態
 
 ### P0 の合格条件
@@ -156,7 +159,7 @@ npx playwright test --project=visual  # 2回目 全green（ビルド再現性込
 1. **CLAUDE.md 更新**: 「インラインstyle」記述 → 「globals.css のトークン+@layer 共通クラス + CSS Modules（Tailwind不使用）。インラインは計算値のCSS変数注入とSVG属性のみ」。styles.ts 言及削除、visual コマンド追記
 2. **`.claude/rules/ui-number-emphasis.md`**: コード例を CSS Modules 版へ（原則は不変）
 3. **`.claude/rules/styling.md` 新設**（ユーザ確認の上）: `paths:` frontmatter 付きでトークン命名・動的スタイル規約を常設化
-4. **最終検証の順序**: `npx playwright test`（visual 20 + chromium 28）→ `npm run test`（84）→ `npm run lint` → **ユーザ目視（ポート3000）** → OK後、ベースラインPNGのコミット可否確認 → コミットはユーザ指示後のみ
+4. **最終検証の順序**: `npx playwright test`（visual 20（現在は 21） + chromium 28）→ `npm run test`（84）→ `npm run lint` → **ユーザ目視（ポート3000）** → OK後、ベースラインPNGのコミット可否確認 → コミットはユーザ指示後のみ
 5. 計画を `docs/plans/03-inline-style-to-css-migration.md` に保存（実装冒頭で実施）
 
 ## リスクと対策

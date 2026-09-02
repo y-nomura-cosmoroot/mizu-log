@@ -1,3 +1,5 @@
+import type { Weekday } from "@/types/records";
+
 /** 水タンクの満タン基準量（固定・ユーザー確認済み） */
 export const GOAL_ML = 2000;
 
@@ -13,8 +15,17 @@ export const STORAGE_KEY = "mizu-log";
 /** トースト表示時間(ms) */
 export const TOAST_MS = 2200;
 
-/** タイミングマスタの初期値 */
+/** タイミングマスタの初期値（名前。曜日は全曜日で作る） */
 export const DEFAULT_TIMINGS = ["朝", "昼", "晩"];
+
+/** 全曜日（新規タイミング・旧データ(曜日指定なし)の既定値）。値は Date#getDay の索引 */
+export const ALL_WEEKDAYS: readonly Weekday[] = [0, 1, 2, 3, 4, 5, 6];
+
+/**
+ * 曜日チップの表示順（月→日、ユーザ指定）。保存値は getDay 索引のまま。
+ * カレンダーの見出しは日曜始まりのまま（buildCalendarCells に合わせる）
+ */
+export const WEEKDAY_ORDER: readonly Weekday[] = [1, 2, 3, 4, 5, 6, 0];
 
 /** 薬の量の単位の選択肢 */
 export const DOSE_UNITS = ["錠", "袋", "mg", "g"] as const;
@@ -48,9 +59,9 @@ export const PULSE_HIGH_BPM = 100;
 
 export type BandNo = 1 | 2 | 3;
 
-/** 小計帯の定義（記録日は14時起点、8時間×3帯） */
+/** 小計帯の定義（記録日=暦日、8時間×3帯。8時・16時は後ろの帯） */
 export const BAND_DEFS: ReadonlyArray<{ band: BandNo; label: string }> = [
-  { band: 1, label: "14〜21時" },
-  { band: 2, label: "22〜翌5時" },
-  { band: 3, label: "翌6〜13時" },
+  { band: 1, label: "0〜7時" },
+  { band: 2, label: "8〜15時" },
+  { band: 3, label: "16〜23時" },
 ];

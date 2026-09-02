@@ -1,22 +1,27 @@
 import type { Page } from "@playwright/test";
 import { openApp, T0 } from "./helpers";
 
-// 形式の正は src/stores/useAppStore.ts の persist 設定（partialize + version: 2）。
+// 形式の正は src/stores/useAppStore.ts の persist 設定（partialize + version: 3）。
+// 移行ロジックは src/lib/migrate.ts。
 // localStorage キー "mizu-log" に {state, version} エンベロープで保存される。
-// recordedAt は "YYYY-MM-DDTHH:mm"（ローカルnaive・秒なし）、0〜13時は記録日の翌暦日。
+// recordedAt は "YYYY-MM-DDTHH:mm"（ローカルnaive・秒なし）。
+// recordedAt の暦日部分 = recordDate（記録日=暦日）。
 
 /** T0(2026-08-14T15:00+09:00) の記録日 */
 const RD = "2026-08-14";
 
+const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
+
 const SEED_STATE = {
   intakes: [
-    // 帯1(14〜21時)
+    // 帯2(8〜15時)
     { id: "vw1", kind: "water", ml: 150, recordDate: RD, recordedAt: "2026-08-14T15:10" },
+    // 帯3(16〜23時)
     { id: "vw2", kind: "water", ml: 200, recordDate: RD, recordedAt: "2026-08-14T16:00" },
-    // 帯2(22〜翌5時)
     { id: "vw3", kind: "water", ml: 300, recordDate: RD, recordedAt: "2026-08-14T22:00" },
-    // 帯3(翌6〜13時、翌暦日)
-    { id: "vw4", kind: "water", ml: 120, recordDate: RD, recordedAt: "2026-08-15T06:00" },
+    // 帯1(0〜7時、同じ暦日)
+    { id: "vw4", kind: "water", ml: 120, recordDate: RD, recordedAt: "2026-08-14T06:00" },
+    // 帯2(8〜15時)
     { id: "vu1", kind: "urine", ml: 100, recordDate: RD, recordedAt: "2026-08-14T15:30" },
     // 前日分（カレンダーの非選択日セルに合計を出すため）
     { id: "vp1", kind: "water", ml: 500, recordDate: "2026-08-13", recordedAt: "2026-08-13T18:00" },
@@ -50,9 +55,16 @@ const SEED_STATE = {
     { id: "vf1", kind: "stool", recordDate: RD, recordedAt: "2026-08-14T15:00" },
     { id: "vf2", kind: "meal", recordDate: RD, recordedAt: "2026-08-14T16:00" },
   ],
-  // 朝のみチェック済 → 未チェック行 + ホームの飲み忘れバナー + 履歴の⚠️カード
+  // 朝のみチェック済(8時=帯2) → 未チェック行 + ホームの飲み忘れバナー + 履歴の⚠️カード
   medChecks: { [RD]: { 朝: 8 } },
-  timings: ["朝", "昼", "晩", "ねる前"],
+  timings: [
+    { name: "朝", weekdays: ALL_WEEKDAYS },
+    { name: "昼", weekdays: ALL_WEEKDAYS },
+    { name: "晩", weekdays: ALL_WEEKDAYS },
+    // 月水金のみ。T0=2026-08-14 は金曜なので ねる前 は有効（進捗 1/4 は不変）。
+    // OFF チップを meds-master で撮るための設定。T0 を変えるならここも見直す
+    { name: "ねる前", weekdays: [1, 3, 5] },
+  ],
   medicines: [
     { id: "vm1", name: "タケキャブ", doseAmount: "1", doseUnit: "錠", timings: ["朝", "晩"] },
     { id: "vm2", name: "マグミット", doseAmount: "2", doseUnit: "錠", timings: ["朝", "昼", "晩"] },
@@ -62,15 +74,15 @@ const SEED_STATE = {
 };
 
 /** 標準シード（飲水/尿・バイタル・便食事・薬・一部チェック済） */
-export const SEED = { state: SEED_STATE, version: 2 };
+export const SEED = { state: SEED_STATE, version: 3 };
 
-/** 全タイミングチェック済（履歴おくすりの🎉カード用） */
+/** 全タイミングチェック済（履歴おくすりの🎉カード用）。8/12時=帯2、19/21時=帯3 */
 export const ALL_CHECKED_SEED = {
   state: {
     ...SEED_STATE,
     medChecks: { [RD]: { 朝: 8, 昼: 12, 晩: 19, ねる前: 21 } },
   },
-  version: 2,
+  version: 3,
 };
 
 /**
@@ -88,6 +100,11 @@ export async function openSeeded(
       ["mizu-log", JSON.stringify(seed)] as const
     );
   }
+  // ホームの助言バブルは候補文言からランダムに1件選ぶ（lib/intakeAdvice pickAdviceMessage）。
+  // 固定値にして常に候補の先頭を出し、スクショを決定的にする（seed=null の home-empty も対象）
+  await page.addInitScript(() => {
+    Math.random = () => 0;
+  });
   await openApp(page, T0, path);
   // next/font(Noto Sans JP)のロード完了までスクショを撮らない
   await page.evaluate(() => document.fonts.ready);

@@ -1,6 +1,6 @@
 "use client";
 
-import { sortMedicines } from "@/lib/meds";
+import { sortMedicines, timingNames } from "@/lib/meds";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import MedicineFieldRow from "./MedicineFieldRow";
@@ -18,7 +18,9 @@ export default function MedicineMasterCard() {
   const markMovedMed = useUiStore((s) => s.markMovedMed);
   const openCameraSheet = useUiStore((s) => s.openCameraSheet);
 
-  const sorted = sortMedicines(medicines, timings);
+  // 薬↔タイミングの紐付けは曜日と無関係なので、マスタの全タイミング名を出す
+  const names = timingNames(timings);
+  const sorted = sortMedicines(medicines, names);
 
   return (
     <div className={`panel ${styles.root}`}>
@@ -41,7 +43,7 @@ export default function MedicineMasterCard() {
             onDelete={() => deleteMedicine(m.id)}
           />
           <div className={styles.tagRow}>
-            {timings.map((t) => {
+            {names.map((t) => {
               const on = m.timings.includes(t);
               return (
                 <button

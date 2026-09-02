@@ -10,12 +10,12 @@
 ## プロジェクト要点
 
 - **mizu-log（みずログ）**: 入院患者が飲水量・尿量・体温・血圧・脈拍・体重・便・食事・内服を記録するモバイルWebアプリ。患者本人が記録し、看護師は同じ端末の画面を閲覧するだけ（専用機能なし）
-- **記録日は14時起点**（14:00〜翌13:59 が1日）。小計帯は8時間×3（14〜21時 / 22〜翌5時 / 翌6〜13時）
+- **記録日は暦日**（0:00〜23:59 が1日）。小計帯は8時間×3（0〜7時 / 8〜15時 / 16〜23時）
 - 飲水・尿量は個別記録を全保持し、合計・小計は**表示時に都度計算**（合計値は保存しない）
 - データは **localStorage 単一キー `mizu-log`**（`{state, version}` エンベロープ）。DB・サーバー同期なし、単一端末前提。バックアップ機能は作らない（確定）
 - Next.js 16 (App Router) + TypeScript + Zustand。スタイルは **globals.css のデザイントークン（CSS変数）+ `@layer` 共通クラス + 各コンポーネント同置の CSS Modules**（Tailwind不使用）。インラインstyleは計算値のCSS変数注入（`--tank-h`・`--beat`）のみ許可。規約は [.claude/rules/styling.md](.claude/rules/styling.md)
 - 検索除け: metaタグ `noindex, nofollow`（layout.tsxのMetadata API）+ robots.txt Disallow。認証なし公開前提
-- **UIの正はデザインモック** `design/mizu-log App.dc.html`（Claude Design出力）。見た目の変更はモックと突き合わせる
+- **UIの正はデザインモック** `design/mizu-log App.dc.html`（Claude Design出力）。見た目の変更はモックと突き合わせる。**モックは14時起点・曜日なしのまま**（更新しない）。差分は [docs/plans/02](docs/plans/02-mizu-log-implementation.md) の「意図的差分」表が正
 
 ## 作業の進め方（実行前に説明して同意を取る）
 
@@ -48,8 +48,8 @@
 
 - [src/app/](src/app/) — `layout.tsx`（robotsメタ+Noto Sans JP）・`page.tsx`・`robots.ts`・`globals.css`（**:root デザイントークン + @layer 共通クラス** + keyframes）
 - [src/components/](src/components/) — `AppShell.tsx`（タブ+`?tab=`URL同期+ハイドレーションゲート）と共通UI。配下に `home/` `input/` `meds/` `history/` `sheets/`。各コンポーネントの隣に `*.module.css`（履歴3兄弟共有の `history/history.module.css` あり）
-- [src/lib/](src/lib/) — **Reactに依存しない純粋関数のみ**。`time.ts`（記録日・帯判定）・`aggregate.ts`（集計）・`meds.ts`・`calendar.ts`・`constants.ts`（GOAL_ML=2000, QUICK_AMOUNTS=[50,100,150,200]）
-- [src/stores/](src/stores/) — `useAppStore.ts`（永続データ、zustand persist **v2**。v1→v2は薬の量 `dose`→`doseAmount`+`doseUnit` 分割）・`useUiStore.ts`（非永続UI状態）
+- [src/lib/](src/lib/) — **Reactに依存しない純粋関数のみ**。`time.ts`（記録日・帯・曜日）・`aggregate.ts`（集計）・`meds.ts`（曜日判定含む）・`migrate.ts`（永続データの移行・正規化）・`calendar.ts`・`constants.ts`（GOAL_ML=2000, QUICK_AMOUNTS=[50,100,150,200]）
+- [src/stores/](src/stores/) — `useAppStore.ts`（永続データ、zustand persist **v3**。移行は [src/lib/migrate.ts](src/lib/migrate.ts)（純粋関数・Vitest対象）: v1→v2 薬の量 `dose`→`doseAmount`+`doseUnit` 分割、v2→v3 記録日を暦日へ（`recordDate` を `recordedAt` から再導出、`medChecks` の0〜13時を翌暦日へ、移動先が埋まっていれば元の日に据え置き）+ `timings` に `weekdays`。移行前に生エンベロープを `mizu-log.bak.v<旧version>` へ1回退避）・`useUiStore.ts`（非永続UI状態）
 - [src/types/records.ts](src/types/records.ts) — 全データ型
 - [`src/lib/__tests__/`](src/lib/__tests__/) — Vitest、[e2e/](e2e/) — Playwright
 - [docs/plans/](docs/plans/) — 要件定義・実装計画、[design/](design/) — デザインモック（lint対象外）
@@ -73,9 +73,13 @@ npx playwright test --project=visual     # 視覚回帰のみ（スクショ比�
 - `next.config.ts` で `devIndicators: false` にしてある。Next devの左下インジケーター（`<nextjs-portal>`）がボトムナビ左端 `nav-home` へのクリックを遮り E2E が落ちるため。戻さない
 - `AGENTS.md` は `next dev` が自動再生成するNext.js公式ファイル。消しても復活する
 - `.git/config` に**ユーザーが設定したGitHubリモート**（`y-nomura-cosmoroot/mizu-log`）がある。`.git` を作り直さない
-- 0〜13時の記録は記録日の**翌暦日**の `recordedAt` になる（`toRecordedAt`）。recordedAt の暦日と recordDate は一致しないことがある仕様
+- `recordedAt` の暦日 = `recordDate`（**v3 の不変条件**）。v2以前は 0〜13時が翌暦日だったが `migrate` が再計算する
 - バイタルは1保存=1レコード（5項目まとめて）。空文字=未入力。全項目空のみ保存拒否
-- 内服チェックは**タイミング単位**（薬ごとではない）。アラート判定は常に現在のマスタ基準
+- 内服チェックは**タイミング単位**（薬ごとではない）。アラート判定は常に現在のマスタ基準。タイミングは曜日指定（`Timing.weekdays`、0=日…6=土、最低1つ）。チェック行の分母・飲み忘れ判定・月ごと⚠️は**表示中の記録日の曜日**で有効なものだけ、履歴の実績は曜日に関係なく表示
+- persist の `migrate`/`merge` は**絶対に throw させない**（白画面になる）。未知 version は初期化せず形状正規化
+- 時間セレクタは `HOURS=[0..23]` の1ブロック。`HOUR_CYCLE`/`hourOrder` は削除済み、時刻ソートは `(a,b)=>a-b`
+- `medChecks` の hour 0 は正当な値。falsy 判定禁止
+- `AppShell` は `visibilitychange` + 60秒間隔で `syncDay` を呼び、開いたまま0時を跨いでも今日を追従
 
 ## Plan モード運用
 

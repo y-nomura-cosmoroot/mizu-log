@@ -3,7 +3,11 @@ import { T0 } from "./helpers";
 import { ALL_CHECKED_SEED, openSeeded } from "./visual-helpers";
 
 // インラインstyle→CSSデザイントークン+CSS Modules 移行の視覚回帰スイート。
-// ベースラインは移行前のHEADで生成し、各移行バッチ後に差分ゼロを確認する。
+// ベースラインは移行前のHEADで生成し、各移行バッチ後に差分ゼロを確認した。
+// 2026-09: 記録日=暦日化（帯 0〜7/8〜15/16〜23時、時刻ドロップダウンは 0〜23時 の1ブロック）と
+// タイミングの曜日チップ追加（meds-master で ねる前=月水金 の OFF チップを撮る）に合わせて
+// ベースラインを再生成した（rebaseline）。シードは visual-helpers.ts（version: 3）。
+// 以後は意図したUI変更のときだけベースラインを更新する。
 // 実行: npx playwright test --project=visual
 // ベースライン更新: npx playwright test --project=visual --update-snapshots
 

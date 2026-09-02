@@ -26,7 +26,7 @@ test.describe("履歴: 編集・削除", () => {
 
     await expect(page.getByTestId("toast")).toHaveText("なおしました");
     await expect(page.getByTestId("hour-w-15")).toHaveText("270ml");
-    await expect(page.getByTestId("band-w1")).toHaveText("270ml");
+    await expect(page.getByTestId("band-w2")).toHaveText("270ml"); // 15時=帯2
     await expect(page.getByTestId("day-total-water")).toHaveText("270ml");
   });
 

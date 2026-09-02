@@ -42,7 +42,7 @@ paths:
 4. **連続計算値のみ inline の CSS 変数注入を許可**: `style={{ "--tank-h": h } as React.CSSProperties}`（TankBackground）、`--beat`（BodyFigure）。**それ以外の inline style は禁止**
 
 - `[data-testid]` をCSSセレクタに使わない。data 属性の名前・値は E2E が参照するため変えない
-- 同一詳細度のセレクタは記述順で勝敗が決まる（例: `.hourChip[data-selected="true"]` はサイド配色より後に書く）
+- 同一詳細度のセレクタは記述順で勝敗が決まる（例: `.hourChip[data-selected="true"]` は基本の `.hourChip` の後に、TimingMasterCard の曜日チップは `[data-on="true"]` を `[data-on="false"]` の後に書く）
 
 ## @keyframes の置き場所（重要・事故歴あり）
 
@@ -59,7 +59,7 @@ keyframes をモジュールから参照すると名前が一致せず**アニ�
 
 ## 視覚回帰（見た目を変えたら必ず）
 
-- `npx playwright test --project=visual` — 20ショットをベースラインとピクセル比較（`maxDiffPixels: 0`）
+- `npx playwright test --project=visual` — 21ショットをベースラインとピクセル比較（`maxDiffPixels: 0`）
 - **意図した見た目の変更**をしたら、ユーザの目視OK後に `npx playwright test --project=visual --update-snapshots` でベースラインを更新し、PNGの差分もコミットに含める
 - ベースライン（`e2e/__screenshots__/`）は **Windowsローカル専用**。別OSで `--update-snapshots` しない（全ショットが差分になる）
-- 撮影対象を増やすときは `e2e/visual.spec.ts` に追加（シードは `e2e/visual-helpers.ts`。localStorage `{state, version:2}` エンベロープ直接注入方式）
+- 撮影対象を増やすときは `e2e/visual.spec.ts` に追加（シードは `e2e/visual-helpers.ts`。localStorage `{state, version:3}` エンベロープ直接注入方式。version は `useAppStore` の `PERSIST_VERSION` に合わせる）。`openSeeded` は `Math.random` を固定するため、助言バブルの文言は決定的（ランダム文言でショットが揺れない）

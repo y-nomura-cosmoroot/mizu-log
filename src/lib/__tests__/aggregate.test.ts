@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FlagRecord, IntakeRecord, VitalRecord } from "@/types/records";
+import type { FlagRecord, IntakeRecord, Timing, VitalRecord } from "@/types/records";
 import {
   barPct,
   buildMonthlySummary,
@@ -10,9 +10,13 @@ import {
   sumForDay,
   sumForHour,
 } from "../aggregate";
+import { makeTiming } from "../meds";
 
 const D = "2026-08-14";
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** 記録日=暦日なので recordedAt の日付部分は常に recordDate と同じ */
 function intake(
   kind: "water" | "urine",
   h: number,
@@ -20,11 +24,10 @@ function intake(
   ml: number,
   date = D
 ): IntakeRecord {
-  const calDay = h < 14 ? "2026-08-15" : date;
   return {
-    id: `${kind}-${h}-${m}-${ml}`,
+    id: `${kind}-${date}-${h}-${m}-${ml}`,
     kind,
-    recordedAt: `${calDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
+    recordedAt: `${date}T${pad2(h)}:${pad2(m)}`,
     recordDate: date,
     ml,
   };
@@ -53,22 +56,22 @@ describe("sumForHour / sumForDay（同一時間内の複数回入力は合算）
   });
 });
 
-describe("sumForBand（帯別小計）", () => {
+describe("sumForBand（帯別小計: 0〜7時 / 8〜15時 / 16〜23時）", () => {
   const intakes = [
-    intake("water", 14, 0, 100), // 帯1
-    intake("water", 21, 30, 50), // 帯1
-    intake("water", 22, 0, 200), // 帯2
-    intake("water", 3, 0, 30), // 帯2（翌暦日）
-    intake("water", 6, 0, 40), // 帯3（翌暦日）
-    intake("water", 13, 0, 60), // 帯3（翌暦日）
+    intake("water", 0, 0, 100), // 帯1
+    intake("water", 7, 30, 50), // 帯1
+    intake("water", 8, 0, 200), // 帯2（8時は後ろの帯）
+    intake("water", 15, 59, 30), // 帯2
+    intake("water", 16, 0, 40), // 帯3（16時は後ろの帯）
+    intake("water", 23, 0, 60), // 帯3
   ];
-  it("帯1 = 14〜21時", () => {
+  it("帯1 = 0〜7時", () => {
     expect(sumForBand(intakes, "water", D, 1)).toBe(150);
   });
-  it("帯2 = 22〜翌5時", () => {
+  it("帯2 = 8〜15時", () => {
     expect(sumForBand(intakes, "water", D, 2)).toBe(230);
   });
-  it("帯3 = 翌6〜13時", () => {
+  it("帯3 = 16〜23時", () => {
     expect(sumForBand(intakes, "water", D, 3)).toBe(100);
   });
   it("3帯の合計 = 日合計（隙間なし）", () => {
@@ -106,27 +109,37 @@ describe("groupIntakesByBandHour（履歴グルーピング）", () => {
   it("3帯が常に返る", () => {
     expect(groups).toHaveLength(3);
     expect(groups.map((g) => g.band)).toEqual([1, 2, 3]);
+    expect(groups.map((g) => g.label)).toEqual(["0〜7時", "8〜15時", "16〜23時"]);
   });
-  it("帯1の15時に飲水250/尿量300、個別3件が分昇順", () => {
-    const h15 = groups[0].hours.find((h) => h.hour === 15)!;
+  it("帯2の15時に飲水250/尿量300、個別3件が分昇順", () => {
+    const h15 = groups[1].hours.find((h) => h.hour === 15)!;
     expect(h15.waterSum).toBe(250);
     expect(h15.urineSum).toBe(300);
     expect(h15.items.map((i) => i.ml)).toEqual([150, 300, 100]); // 10分,20分,40分
   });
-  it("帯2に翌3時の記録", () => {
-    expect(groups[1].hours.map((h) => h.hour)).toEqual([3]);
-    expect(groups[1].waterSum).toBe(50);
+  it("帯1に3時の記録", () => {
+    expect(groups[0].hours.map((h) => h.hour)).toEqual([3]);
+    expect(groups[0].waterSum).toBe(50);
   });
   it("記録の無い帯は時間行が空", () => {
     expect(groups[2].hours).toHaveLength(0);
   });
+  it("帯内の時間行は時昇順（22時→16時の順に入力しても [16, 22]）", () => {
+    const g = groupIntakesByBandHour(
+      [intake("water", 22, 0, 10), intake("water", 16, 0, 20)],
+      D
+    );
+    expect(g[2].hours.map((h) => h.hour)).toEqual([16, 22]);
+    expect(g[2].waterSum).toBe(30);
+    expect(g[0].hours).toHaveLength(0);
+    expect(g[1].hours).toHaveLength(0);
+  });
 });
 
 function vital(h: number, m: number, patch: Partial<VitalRecord> = {}): VitalRecord {
-  const calDay = h < 14 ? "2026-08-15" : D;
   return {
     id: `v-${h}-${m}`,
-    recordedAt: `${calDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
+    recordedAt: `${D}T${pad2(h)}:${pad2(m)}`,
     recordDate: D,
     temp: "",
     bpSys: "",
@@ -138,36 +151,33 @@ function vital(h: number, m: number, patch: Partial<VitalRecord> = {}): VitalRec
 }
 
 function flag(kind: "stool" | "meal", h: number): FlagRecord {
-  const calDay = h < 14 ? "2026-08-15" : D;
   return {
     id: `f-${kind}-${h}-${Math.random()}`,
     kind,
-    recordedAt: `${calDay}T${String(h).padStart(2, "0")}:00`,
+    recordedAt: `${D}T${pad2(h)}:00`,
     recordDate: D,
   };
 }
 
 describe("groupVitalEntriesByBandHour", () => {
-  it("同一項目は同時間の最新値が行サマリになる", () => {
+  it("同一項目は同時間の最新値が行サマリになる（15時は帯2）", () => {
     const vitals = [vital(15, 10, { temp: "36.5" }), vital(15, 50, { temp: "37.8" })];
     const groups = groupVitalEntriesByBandHour(vitals, [], D);
-    const h15 = groups[0].hours.find((h) => h.hour === 15)!;
+    const h15 = groups[1].hours.find((h) => h.hour === 15)!;
     expect(h15.summary?.temp).toBe("37.8");
     expect(h15.items).toHaveLength(2);
   });
-  it("便・食事は件数として集計される", () => {
+  it("便・食事は件数として集計される（9時は帯2）", () => {
     const flags = [flag("stool", 9), flag("stool", 9), flag("meal", 9)];
     const groups = groupVitalEntriesByBandHour([], flags, D);
-    const h9 = groups[2].hours.find((h) => h.hour === 9)!;
+    const h9 = groups[1].hours.find((h) => h.hour === 9)!;
     expect(h9.stoolCount).toBe(2);
     expect(h9.mealCount).toBe(1);
     expect(h9.summary).toBeNull();
   });
-  it("記録が無い帯はempty", () => {
+  it("記録が無い帯はempty（8時の1件だけなら帯2のみ非empty）", () => {
     const groups = groupVitalEntriesByBandHour([], [flag("meal", 8)], D);
-    expect(groups[0].empty).toBe(true);
-    expect(groups[1].empty).toBe(true);
-    expect(groups[2].empty).toBe(false);
+    expect(groups.map((g) => g.empty)).toEqual([true, false, true]);
   });
 });
 
@@ -290,7 +300,7 @@ describe("countFlags", () => {
 });
 
 describe("buildMonthlySummary（月ごと一覧）", () => {
-  const timings = ["朝", "晩"];
+  const timings: Timing[] = [makeTiming("朝"), makeTiming("晩")]; // 全曜日
   const intakes = [
     intake("water", 15, 0, 500, "2026-08-10"),
     intake("water", 16, 0, 200, "2026-08-10"),
@@ -350,5 +360,50 @@ describe("buildMonthlySummary（月ごと一覧）", () => {
   it("過去月は末日まで、未来月は空配列", () => {
     expect(buildMonthlySummary([], [], [], {}, timings, 2026, 6, "2026-08-14")).toHaveLength(31);
     expect(buildMonthlySummary([], [], [], {}, timings, 2026, 8, "2026-08-14")).toHaveLength(0);
+  });
+});
+
+describe("buildMonthlySummary（曜日指定タイミング）", () => {
+  // 2026-08-09(日) / 08-10(月) / 08-11(火) / 08-12(水)。days[i] は 8/(i+1)
+  const TODAY = "2026-08-14";
+
+  it("その日の曜日に飲まないタイミングは飲み忘れ判定に含めない", () => {
+    const timings: Timing[] = [makeTiming("朝"), makeTiming("晩", [1])]; // 晩=月のみ
+    const intakes = [
+      intake("water", 10, 0, 100, "2026-08-10"),
+      intake("water", 10, 0, 100, "2026-08-11"),
+      intake("water", 10, 0, 100, "2026-08-12"),
+    ];
+    const medChecks = {
+      "2026-08-10": { 朝: 8 },
+      "2026-08-12": { 朝: 8 },
+    };
+    const days = buildMonthlySummary(intakes, [], [], medChecks, timings, 2026, 7, TODAY);
+    expect(days[9].date).toBe("2026-08-10");
+    expect(days[9].medsMissed).toBe(true); // 月: 晩が対象で未チェック
+    expect(days[10].medsMissed).toBe(true); // 火: 朝(全曜日)が未チェック
+    expect(days[11].medsMissed).toBe(false); // 水: 晩は対象外、朝はチェック済み
+  });
+
+  it("その日に対象タイミングが無ければ記録があっても飲み忘れにならない", () => {
+    const timings: Timing[] = [makeTiming("朝", [0])]; // 日のみ
+    const intakes = [
+      intake("water", 10, 0, 100, "2026-08-09"),
+      intake("water", 10, 0, 100, "2026-08-10"),
+    ];
+    const days = buildMonthlySummary(intakes, [], [], {}, timings, 2026, 7, TODAY);
+    expect(days[8].date).toBe("2026-08-09");
+    expect(days[8].hasRecords).toBe(true);
+    expect(days[8].medsMissed).toBe(true); // 日: 朝が対象・未チェック
+    expect(days[9].hasRecords).toBe(true);
+    expect(days[9].medsMissed).toBe(false); // 月: 対象タイミングなし
+  });
+
+  it("0時のチェック(値0)もチェック済みとして扱う（記録あり・飲み忘れなし）", () => {
+    const timings: Timing[] = [makeTiming("朝")];
+    const medChecks = { "2026-08-10": { 朝: 0 } };
+    const days = buildMonthlySummary([], [], [], medChecks, timings, 2026, 7, TODAY);
+    expect(days[9].hasRecords).toBe(true); // チェックだけでも記録あり
+    expect(days[9].medsMissed).toBe(false);
   });
 });

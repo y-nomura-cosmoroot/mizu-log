@@ -36,3 +36,12 @@
   cursor: pointer;
   box-shadow: var(--sh-btn-s);
 }
+
+/* その日に飲む対象のタイミングが無いときの案内 */
+.emptyNote {
+  padding: 18px 16px;
+  text-align: center;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--c-muted-500);
+}

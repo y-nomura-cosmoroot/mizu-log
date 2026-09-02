@@ -17,7 +17,8 @@ test.describe("localStorage永続化とdeep-link", () => {
     const raw = await page.evaluate(() => localStorage.getItem("mizu-log"));
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
-    expect(parsed.version).toBe(2);
+    expect(parsed.version).toBe(3);
+    expect(parsed.state.timings[0]).toEqual({ name: "朝", weekdays: [0, 1, 2, 3, 4, 5, 6] });
     expect(parsed.state.intakes).toHaveLength(1);
     expect(parsed.state.vitals).toHaveLength(1);
     expect(parsed.state.medChecks["2026-08-14"]["朝"]).toBe(15);

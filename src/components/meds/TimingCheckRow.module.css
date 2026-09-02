@@ -1,13 +1,20 @@
 /* 未チェック時は黄色系で「まだ」を目立たせる（1ファイル閉じのワンオフ色） */
+/* 曜日指定があるタイミングは2段（1段目=チェック行、2段目=曜日チップ） */
 .row {
   background: #fff8e1;
   border: 1.5px solid #f0d98c;
   border-radius: var(--r-18);
   padding: 13px 14px;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--sh-row);
+}
+
+.rowMain {
+  display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--sh-row);
 }
 
 .row.isChecked {
@@ -62,4 +69,82 @@
   border-radius: var(--r-12);
   padding: 10px 14px;
   cursor: pointer;
+}
+
+/* 曜日対象外の日: 薄色にする（isChecked より後に書いて勝たせる） */
+.row[data-inactive="true"] {
+  background: var(--c-surface-dim);
+  border: 1px solid var(--c-line-soft);
+  box-shadow: none;
+}
+
+.row[data-inactive="true"] .title {
+  color: var(--c-muted-600);
+}
+
+/* 対象外かつ未チェック: 押せない丸（レイアウト合わせのプレースホルダ） */
+.checkPlaceholder {
+  display: inline-block;
+  border-color: var(--c-line-nav);
+  background: transparent;
+  cursor: default;
+}
+
+/* 「きょうは 金よう日だからのまない日」の一文。曜日と判定を同じ強さで見せる */
+.dayLine {
+  font-size: var(--fs-12);
+  color: var(--c-muted-600);
+}
+
+.dayEmph {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-black);
+}
+
+.dayLine[data-on="false"] .dayEmph {
+  color: var(--c-muted-600);
+}
+
+/* のむ日側は のまない日 より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+.dayLine[data-on="true"] .dayEmph {
+  color: var(--c-primary-700);
+}
+
+/* マスタと同じ曜日チップ（表示のみで押せない） */
+.weekdayChips {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekdayChip {
+  border: 1.5px solid transparent; /* ON/OFF で高さを揃えるため両状態とも枠を持つ */
+  border-radius: var(--r-pill);
+  padding: 5px 0;
+  text-align: center;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+}
+
+.weekdayChip[data-on="false"] {
+  background: #fff;
+  border-color: var(--c-line-input);
+  color: var(--c-muted-500);
+}
+
+/* ON は OFF より後に書いて勝たせる（同一詳細度のため記述順で決まる） */
+.weekdayChip[data-on="true"] {
+  background: var(--c-primary-500);
+  color: #fff;
+  font-weight: var(--fw-black);
+}
+
+/* 表示中の日の曜日は内側リングで示す（ON/OFF の後に書く） */
+.weekdayChip[data-today="true"] {
+  box-shadow: inset 0 0 0 2px var(--c-primary-500);
+}
+
+/* 青塗り（ON）と重なったときは白リングにして見えるようにする */
+.weekdayChip[data-on="true"][data-today="true"] {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
