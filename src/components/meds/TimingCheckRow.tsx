@@ -11,9 +11,10 @@ import styles from "./TimingCheckRow.module.css";
 
 /**
  * タイミング1件のチェック行。
- * マスタと同じ月〜日チップを表示専用で並べ（表示中の日はリングで示す）、曜日を絞っている
- * タイミングにはその上に「きょうは 金よう日だからのまない日」の一文を出す
- * （毎日のタイミングはチップだけ。曜日で変わらないので一文は出さない）。
+ * 2段目に、毎日のタイミングなら「まいにちのむ」、曜日を絞っているなら
+ * 「きょうは 金よう日だからのまない日」の一文を出す（曜日と判定は同じ強調）。
+ * 曜日を絞っているタイミングだけ、3段目にマスタと同じ月〜日チップを表示専用で並べる
+ * （表示中の日の曜日はリングで示す。毎日はすべてONで情報が無いので出さない）。
  * inactive（その日の曜日に飲まない）なら薄色にして記録はさせない。
  * ただし既にチェック済みなら ✓ を表示して解除だけできる（誤チェックを直せるようにする）
  */
@@ -82,32 +83,38 @@ export default function TimingCheckRow({
         )}
       </div>
 
+      <div
+        data-testid={`timing-day-label-${name}`}
+        data-on={!inactive}
+        className={styles.dayLine}
+      >
+        {everyday ? (
+          <b className={styles.dayEmph}>まいにちのむ</b>
+        ) : (
+          <>
+            {isToday ? "きょうは " : ""}
+            <b className={styles.dayEmph}>{WEEKDAY_LABELS[viewWeekday]}よう日</b>
+            だから
+            <b className={styles.dayEmph}>{inactive ? "のまない日" : "のむ日"}</b>
+          </>
+        )}
+      </div>
+
       {!everyday && (
-        <div
-          data-testid={`timing-day-label-${name}`}
-          data-on={!inactive}
-          className={styles.dayLine}
-        >
-          {isToday ? "きょうは " : ""}
-          <b className={styles.dayEmph}>{WEEKDAY_LABELS[viewWeekday]}よう日</b>
-          だから
-          <b className={styles.dayEmph}>{inactive ? "のまない日" : "のむ日"}</b>
+        <div className={styles.weekdayChips} role="group" aria-label={`${name}をのむ曜日`}>
+          {WEEKDAY_ORDER.map((wd) => (
+            <span
+              key={wd}
+              data-testid={`timing-row-weekday-${name}-${wd}`}
+              data-on={timing.weekdays.includes(wd)}
+              data-today={wd === viewWeekday}
+              className={styles.weekdayChip}
+            >
+              {WEEKDAY_LABELS[wd]}
+            </span>
+          ))}
         </div>
       )}
-
-      <div className={styles.weekdayChips} role="group" aria-label={`${name}をのむ曜日`}>
-        {WEEKDAY_ORDER.map((wd) => (
-          <span
-            key={wd}
-            data-testid={`timing-row-weekday-${name}-${wd}`}
-            data-on={timing.weekdays.includes(wd)}
-            data-today={wd === viewWeekday}
-            className={styles.weekdayChip}
-          >
-            {WEEKDAY_LABELS[wd]}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

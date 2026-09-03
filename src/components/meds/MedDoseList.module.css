@@ -1,8 +1,39 @@
-.num {
-  font-size: var(--fs-18);
+/*
+ * 重要度で3段階に分ける（ユーザ指示 2026-09-03）:
+ * 1. 名前 = 一番大きく極太 / 2. 数値 = 一段小さく太字 / 3. 単位 = 通常テキスト
+ * 色は呼び出し元から継承させる（対象外の日の薄色表示をそのまま効かせるため）
+ */
+.name {
   font-weight: var(--fw-black);
 }
 
-.numSm {
+.nameMd {
+  font-size: var(--fs-17);
+}
+
+.nameSm {
+  font-size: var(--fs-16);
+}
+
+.num {
+  font-weight: var(--fw-bold);
+}
+
+.numMd {
   font-size: var(--fs-15);
+}
+
+.numSm {
+  font-size: var(--fs-14);
+}
+
+.unit {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+}
+
+.empty {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  color: var(--c-muted-500);
 }

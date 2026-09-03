@@ -15,7 +15,7 @@
 | 論点 | 決定 |
 |---|---|
 | 曜日の下限 | **最低1曜日は必須**。最後の1つはタップしても外れず、トースト「曜日は 1つ以上 えらんでください」 |
-| 対象外の日の表示 | **薄く表示**。「のんだ！」ボタンは出さない。分母・飲み忘れ判定から除外。既にチェック済みなら ✓ を表示し**解除だけ**できる。チェック行には全タイミングにマスタと同じ月〜日チップを表示専用で並べ（表示中の日はリング）、曜日指定があるものにだけ「きょうは ◯よう日だからのむ日 / のまない日」の一文を出す（曜日と判定を同じ強調。毎日のタイミングは曜日で変わらないので一文なし。ユーザ指示 2026-09-02） |
+| 対象外の日の表示 | **薄く表示**。「のんだ！」ボタンは出さない。分母・飲み忘れ判定から除外。既にチェック済みなら ✓ を表示し**解除だけ**できる。チェック行には全タイミングに一文を出す（毎日は「まいにちのむ」、曜日指定ありは「きょうは ◯よう日だからのむ日 / のまない日」。曜日・判定・まいにちのむ は同じ強調）。曜日指定があるものだけマスタと同じ月〜日チップを表示専用で並べる（表示中の日はリング。毎日は全ONで情報が無いので出さない。ユーザ指示 2026-09-02） |
 | 移行前の退避 | **退避する**。`mizu-log.bak.v<旧version>` に1回だけ生エンベロープを保存（UIなし・失敗しても無視） |
 | 帯の目安量 | **0〜7時:300 / 8〜15時:850 / 16〜23時:850**（合計 2000 = GOAL_ML） |
 
@@ -155,7 +155,7 @@ export function migratePersisted(persisted, version): AppData
 **きょうの分 [src/components/meds/MedsTab.tsx](../../src/components/meds/MedsTab.tsx) / [TimingCheckRow.tsx](../../src/components/meds/TimingCheckRow.tsx)**
 
 - `const active = activeTimings(timings, viewDate)`（曜日は **viewDate** から。`new Date()` は使わない）。進捗 `done / active.length`（done は active のチェック数）。行は**マスタ順で全タイミング**を出し、対象外には `inactive` を渡す
-- `TimingCheckRow({ timing: Timing, inactive })`: `inactive` なら root に `data-inactive="true"`（薄色 CSS）、「のんだ！」ボタン非表示。`inactive && checked` のときだけ ✓ ボタンを出して解除できる。行は `.rowMain` + `.dayLine`（`weekdays.length < 7` のときだけ。`timing-day-label-<name>`、`data-on` で のむ日/のまない日、曜日と判定は同じ `.dayEmph`）+ `.weekdayChips`（常時。`timing-row-weekday-<name>-<wd>` に `data-on` / `data-today`）
+- `TimingCheckRow({ timing: Timing, inactive })`: `inactive` なら root に `data-inactive="true"`（薄色 CSS）、「のんだ！」ボタン非表示。`inactive && checked` のときだけ ✓ ボタンを出して解除できる。行は `.rowMain` + `.dayLine`（常時。`timing-day-label-<name>`、`data-on`。強調は `.dayEmph` で統一）+ `.weekdayChips`（`weekdays.length < 7` のときだけ。`timing-row-weekday-<name>-<wd>` に `data-on` / `data-today`）
 - `active.length === 0 && timings.length > 0` のとき `data-testid="meds-empty-note"`「この日は のむおくすりが ありません」を行の上に表示（`panel` + module override）
 
 **[src/components/meds/MedicineMasterCard.tsx](../../src/components/meds/MedicineMasterCard.tsx)**: `const names = timingNames(timings)` を `sortMedicines` とタグ行に（曜日で絞らない）
@@ -173,7 +173,7 @@ export function migratePersisted(persisted, version): AppData
 - [e2e/history-edit.spec.ts](../../e2e/history-edit.spec.ts): L29 `band-w1`→`band-w2`
 - [e2e/time-navigation.spec.ts](../../e2e/time-navigation.spec.ts): (c-1) 「よくじつ」アサート削除→「きょう」あり・「よくじつ」なし・`hour-chip-0/23` 可視、3時=帯1 / 14時=帯2 / w3 "—"、0時で ‹ → 23時（帯3）。(d) を **0時境界**へ全面書き換え（23:30 → 記録 → `setSystemTime(8/15 00:05)` → reload → 8/15(土)・0時・0ml、0時台の記録は帯1、‹ で 8/14 に 100ml）。**(e) 追加**: reload せず `page.clock.runFor(60_000)` で日付追従（syncDay）を確認
 - [e2e/persistence.spec.ts](../../e2e/persistence.spec.ts): `version` 3、`state.timings[0]` が `{name:"朝", weekdays:[0..6]}`
-- [e2e/meds.spec.ts](../../e2e/meds.spec.ts): f-1 に「追加したタイミングの曜日チップは全部 ON」。**f-4 曜日**: 金に昼をチェック → マスタで `timing-weekday-昼-5` OFF → 昼行が `data-inactive="true"`・「きょうは 金よう日だからのまない日」・表示専用チップ（金=OFF+`data-today`、他ON）、朝は一文なしで全ONチップ・`drank-btn-昼` なし・✓ で解除できる・進捗 "0 / 2"・バナー「朝・晩 がまだです」→ ‹ 8/13(木) では昼が有効で "0 / 3" → 月ごと一覧の 8/14 に ⚠️ なし → localStorage `timings[1].weekdays` = `[0,1,2,3,4,6]` → reload 後も維持。**f-5 空の日**: 朝昼晩の金を OFF → `meds-empty-note`・"0 / 0"・バナーなし・履歴カード「のむおくすりの ない日」。**f-6 下限**: 最後の曜日をタップ → `data-on` true のまま・トースト表示
+- [e2e/meds.spec.ts](../../e2e/meds.spec.ts): f-1 に「追加したタイミングの曜日チップは全部 ON」。**f-4 曜日**: 金に昼をチェック → マスタで `timing-weekday-昼-5` OFF → 昼行が `data-inactive="true"`・「きょうは 金よう日だからのまない日」・表示専用チップ（金=OFF+`data-today`、他ON）、朝は「まいにちのむ」でチップなし・`drank-btn-昼` なし・✓ で解除できる・進捗 "0 / 2"・バナー「朝・晩 がまだです」→ ‹ 8/13(木) では昼が有効で "0 / 3" → 月ごと一覧の 8/14 に ⚠️ なし → localStorage `timings[1].weekdays` = `[0,1,2,3,4,6]` → reload 後も維持。**f-5 空の日**: 朝昼晩の金を OFF → `meds-empty-note`・"0 / 0"・バナーなし・履歴カード「のむおくすりの ない日」。**f-6 下限**: 最後の曜日をタップ → `data-on` true のまま・トースト表示
 - [e2e/visual-helpers.ts](../../e2e/visual-helpers.ts): `version: 3` ×2、timings を Timing 化（**ねる前は `[1,3,5]`** で OFF チップを撮る。8/14 は金なので有効・進捗 1/4 は不変。コメントで T0 依存を明記）、vw4 を `2026-08-14T06:00`（帯1）へ、帯コメント更新、**`openSeeded` に `Math.random = () => 0` の init script**（助言メッセージがランダムで home-empty が不安定になるのを防ぐ）
 - **新規 [e2e/migration.spec.ts](../../e2e/migration.spec.ts)**: 1つの v2 シード `{intakes: m1(120, recordDate 8/13, recordedAt 8/14T06:00), m2(150, 8/14T15:10), m3(500, 8/13T18:00); medChecks {8/13:{朝:8, 晩:19, 昼:12}, 8/14:{朝:15}}; timings ["朝","昼","晩"]}` → T0 で `water-day-total` 270ml・w1 120・w2 150、`meds-progress` "2 / 3"（昼:12 が 8/14 へ移動、朝:15 は据え置き）、‹ 8/13: 朝:8（衝突で据え置き）と 晩:19 が履歴に残り 昼 が未（data-ok false）、localStorage: `version` 3・m1 の recordDate 8/14・timings が object・**`mizu-log.bak.v2` が存在し元の medChecks を含む**。テスト2: v1 エンベロープ（dose "1mg"）→ `med-dose-0`="1" `med-unit-0`="mg"。テスト3: version 99 → レコード保持・再配置なし。テスト4: version なし → 白画面にならず timings が heal される
 - 動作確認: `npx playwright test --project=chromium`（home-record / monthly-history は `--repeat-each=3` でバブル出現によるレイアウト揺れのフレークが無いことを確認）

@@ -147,16 +147,10 @@ test.describe("おくすり: マスタ編集・チェック・アラート", () 
       "土",
       "日",
     ]);
-    // 毎日のタイミング（朝）: 曜日で変わらないので一文は出さず、全ONのチップだけを出す
-    await expect(page.getByTestId("timing-day-label-朝")).toHaveCount(0);
-    await expect(page.locator('[data-testid^="timing-row-weekday-朝-"]')).toHaveCount(7);
-    for (const wd of [1, 2, 3, 4, 5, 6, 0]) {
-      await expect(page.getByTestId(`timing-row-weekday-朝-${wd}`)).toHaveAttribute(
-        "data-on",
-        "true"
-      );
-    }
-    await expect(page.getByTestId("timing-row-weekday-朝-5")).toHaveAttribute("data-today", "true");
+    // 毎日のタイミング（朝）: 「まいにちのむ」だけを出し、全部ONのチップは出さない
+    await expect(page.getByTestId("timing-day-label-朝")).toHaveText("まいにちのむ");
+    await expect(page.getByTestId("timing-day-label-朝")).toHaveAttribute("data-on", "true");
+    await expect(page.locator('[data-testid^="timing-row-weekday-朝-"]')).toHaveCount(0);
     await expect(page.getByTestId("drank-btn-昼")).toHaveCount(0);
     await expect(page.getByTestId("timing-check-昼")).toBeVisible();
     await expect(page.getByTestId("timing-check-昼")).toHaveText("✓");

@@ -23,10 +23,10 @@
   font-size: var(--fs-12);
 }
 
+/* 強弱（名前 > 数値 > 単位）は MedDoseList 側で付ける。ここは色と区切り文字の大きさだけ */
 .medsCol {
   flex: 1;
   font-size: var(--fs-14);
-  font-weight: var(--fw-bold);
   color: var(--c-ink);
 }
 

@@ -55,9 +55,10 @@
   color: var(--c-muted-500);
 }
 
+/* 強弱（名前 > 数値 > 単位）は MedDoseList 側で付ける。ここは色と行間だけ持つ */
 .meds {
-  font-size: var(--fs-12);
-  color: var(--c-muted-500);
+  color: var(--c-ink);
+  line-height: 1.45;
 }
 
 .drankBtn {
@@ -78,7 +79,8 @@
   box-shadow: none;
 }
 
-.row[data-inactive="true"] .title {
+.row[data-inactive="true"] .title,
+.row[data-inactive="true"] .meds {
   color: var(--c-muted-600);
 }
 
