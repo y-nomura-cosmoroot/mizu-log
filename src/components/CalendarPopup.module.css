@@ -8,6 +8,7 @@
   top: calc(100% + 6px);
   transform: translateX(-50%);
   width: 410px;
+  max-width: calc(100vw - 36px);
   padding: 12px 10px;
   z-index: 22;
 }

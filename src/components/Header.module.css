@@ -80,10 +80,8 @@
 }
 
 .dateWrap {
-  position: relative;
   text-align: center;
   min-width: 84px;
-  z-index: 20;
 }
 
 .dateLabel {
