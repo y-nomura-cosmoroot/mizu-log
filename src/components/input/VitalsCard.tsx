@@ -1,6 +1,6 @@
 "use client";
 
-import { hourOf, targetMinute } from "@/lib/time";
+import { hourOf, isHourMismatched, pad2, targetMinute } from "@/lib/time";
 import { bpLevelOf, buildEffectOf, feverOf, pulseEffectOf } from "@/lib/vitalEffects";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
@@ -50,7 +50,9 @@ export default function VitalsCard() {
   const vitals = useAppStore((s) => s.vitals);
   const addVital = useAppStore((s) => s.addVital);
   const viewDate = useUiStore((s) => s.viewDate);
+  const todayKey = useUiStore((s) => s.todayKey);
   const selHour = useUiStore((s) => s.selHour);
+  const nowHour = useUiStore((s) => s.nowHour);
   const vitalInput = useUiStore((s) => s.vitalInput);
   const setVitalField = useUiStore((s) => s.setVitalField);
   const clearVitalInput = useUiStore((s) => s.clearVitalInput);
@@ -85,9 +87,15 @@ export default function VitalsCard() {
       return;
     }
     const now = new Date();
-    addVital(v, viewDate, selHour, targetMinute(viewDate, selHour, now));
+    const minute = targetMinute(viewDate, selHour, now);
+    const id = addVital(v, viewDate, selHour, minute);
     clearVitalInput();
-    showToast("バイタルをきろくしました");
+    showToast(
+      `${selHour}:${pad2(minute)} に バイタルをきろくしました`,
+      isHourMismatched(viewDate, todayKey, selHour, nowHour)
+        ? { kind: "vital", id, hour: nowHour, minute: now.getMinutes() }
+        : undefined
+    );
   };
 
   return (

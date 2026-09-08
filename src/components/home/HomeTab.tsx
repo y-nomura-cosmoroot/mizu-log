@@ -3,7 +3,7 @@
 import { sumForBand, sumForDay, sumForHour } from "@/lib/aggregate";
 import { getIntakeAdviceState } from "@/lib/intakeAdvice";
 import { uncheckedTimings } from "@/lib/meds";
-import { getRecordDate, targetMinute } from "@/lib/time";
+import { isHourMismatched, pad2, targetMinute } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore } from "@/stores/useUiStore";
 import type { IntakeKind } from "@/types/records";
@@ -21,7 +21,9 @@ export default function HomeTab() {
   const addIntake = useAppStore((s) => s.addIntake);
 
   const viewDate = useUiStore((s) => s.viewDate);
+  const todayKey = useUiStore((s) => s.todayKey);
   const selHour = useUiStore((s) => s.selHour);
+  const nowHour = useUiStore((s) => s.nowHour);
   const customWater = useUiStore((s) => s.customWater);
   const customUrine = useUiStore((s) => s.customUrine);
   const setCustomWater = useUiStore((s) => s.setCustomWater);
@@ -31,15 +33,23 @@ export default function HomeTab() {
   const waterTotal = sumForDay(intakes, "water", viewDate);
   const urineTotal = sumForDay(intakes, "urine", viewDate);
   const unchecked = uncheckedTimings(timings, medChecks, viewDate);
-  const isToday = viewDate === getRecordDate(new Date());
+  const isToday = viewDate === todayKey;
   const adviceState = isToday
     ? getIntakeAdviceState(intakes, viewDate, waterTotal, new Date())
     : null;
 
   const add = (kind: IntakeKind, ml: number) => {
     const now = new Date();
-    addIntake(kind, ml, viewDate, selHour, targetMinute(viewDate, selHour, now));
-    showToast(`${kind === "water" ? "飲水" : "尿量"} +${ml}ml をきろくしました`);
+    const minute = targetMinute(viewDate, selHour, now);
+    const id = addIntake(kind, ml, viewDate, selHour, minute);
+    const label = kind === "water" ? "飲水" : "尿量";
+    // 記録する時間がズレたままなら、トーストから直せるようにする
+    showToast(
+      `${selHour}:${pad2(minute)} に ${label} +${ml}ml をきろくしました`,
+      isHourMismatched(viewDate, todayKey, selHour, nowHour)
+        ? { kind: "intake", id, hour: nowHour, minute: now.getMinutes() }
+        : undefined
+    );
   };
 
   return (

@@ -35,6 +35,9 @@ export interface FlagRecord {
   recordDate: RecordDate;
 }
 
+/** 時刻を持つ記録の種別。トーストからの時刻なおしで対象レコードを指すのに使う */
+export type RecordKind = "intake" | "vital" | "flag";
+
 /** 内服チェック実績: 記録日(暦日) × タイミング名 → チェック時に選択していた時(0-23) */
 export type MedChecks = Record<RecordDate, Record<string, number>>;
 

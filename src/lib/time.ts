@@ -64,6 +64,20 @@ export function targetMinute(viewDate: RecordDate, selHour: number, now: Date): 
     : 0;
 }
 
+/**
+ * 「記録する時間」が現在時とズレているか＝画面を開きっぱなしで時間が過ぎた状態。
+ * 今日を表示中のときだけ true（過去日を見ているのは意図的な操作なので警告しない）。
+ * ヘッダの警告と記録トーストのなおす導線で同じ判定を使う
+ */
+export function isHourMismatched(
+  viewDate: RecordDate,
+  todayKey: RecordDate,
+  selHour: number,
+  nowHour: number
+): boolean {
+  return viewDate === todayKey && selHour !== nowHour;
+}
+
 function toDate(recordDate: RecordDate): Date {
   const [y, mo, d] = recordDate.split("-").map(Number);
   return new Date(y, mo - 1, d);

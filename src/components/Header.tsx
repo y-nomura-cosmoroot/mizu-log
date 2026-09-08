@@ -2,7 +2,7 @@
 
 import { sumForHour } from "@/lib/aggregate";
 import { formatCalendarLabel, ymOf } from "@/lib/calendar";
-import { formatDateLabel, getRecordDate, HOURS } from "@/lib/time";
+import { formatDateLabel, getRecordDate, HOURS, isHourMismatched } from "@/lib/time";
 import { useAppStore } from "@/stores/useAppStore";
 import { useUiStore, type HistSub } from "@/stores/useUiStore";
 import CalendarPopup from "./CalendarPopup";
@@ -22,6 +22,7 @@ export default function Header() {
   const histMonthly = useUiStore((s) => s.histMonthly);
   const setHistMonthly = useUiStore((s) => s.setHistMonthly);
   const viewDate = useUiStore((s) => s.viewDate);
+  const todayKey = useUiStore((s) => s.todayKey);
   const setViewDate = useUiStore((s) => s.setViewDate);
   const goPrevDay = useUiStore((s) => s.goPrevDay);
   const goNextDay = useUiStore((s) => s.goNextDay);
@@ -32,6 +33,7 @@ export default function Header() {
 
   const intakes = useAppStore((s) => s.intakes);
   const selHour = useUiStore((s) => s.selHour);
+  const nowHour = useUiStore((s) => s.nowHour);
   const setSelHour = useUiStore((s) => s.setSelHour);
   const stepSelHour = useUiStore((s) => s.stepSelHour);
   const hourDropOpen = useUiStore((s) => s.hourDropOpen);
@@ -44,9 +46,10 @@ export default function Header() {
   // りれきタブには記録する時間の概念がないため時間ナビを出さない
   const showTimeNav = tab !== "history";
 
-  const now = new Date();
-  const isToday = viewDate === getRecordDate(now);
-  const nowHour = now.getHours();
+  // 「今日か」「いま何時か」は AppShell の毎分tickが更新する store の値を見る。
+  // ここで new Date() を読むと、開いたまま時間が過ぎても再レンダリングが起きず表示が古いままになる
+  const isToday = viewDate === todayKey;
+  const hourMismatch = isHourMismatched(viewDate, todayKey, selHour, nowHour);
 
   const hourChip = (h: number) => {
     const waterSum = sumForHour(intakes, "water", viewDate, h);
@@ -82,15 +85,39 @@ export default function Header() {
           <div className={styles.logoMark} />
           <span className={styles.brandName}>みずログ</span>
         </div>
-        {!monthly && (
-          <button
-            data-testid="go-today"
-            onClick={() => setViewDate(getRecordDate(new Date()))}
-            className={styles.todayBtn}
-          >
-            今日に戻る
-          </button>
-        )}
+        <div className={styles.brandActions}>
+          {/* 開きっぱなしで時間が過ぎたときだけ出る復帰ボタン（見落とし防止に点滅させる） */}
+          {showTimeNav && hourMismatch && (
+            <button
+              data-testid="sel-hour-reset"
+              onClick={() => setSelHour(nowHour)}
+              className={styles.resetBtn}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={styles.resetIcon}
+              >
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <polyline points="21 3 21 9 15 9" />
+              </svg>
+              {nowHour}時（いま）に戻る
+            </button>
+          )}
+          {!monthly && (
+            <button
+              data-testid="go-today"
+              onClick={() => setViewDate(getRecordDate(new Date()))}
+              className={styles.todayBtn}
+            >
+              今日に戻る
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={styles.dateRow}>
@@ -133,7 +160,7 @@ export default function Header() {
               <button
                 data-testid="sel-hour-toggle"
                 onClick={() => setHourDropOpen(!hourDropOpen)}
-                className={styles.toggle}
+                className={`${styles.toggle} ${hourMismatch ? styles.isMismatch : ""}`}
               >
                 {selHour}時 <span className={styles.toggleCaret}>▾</span>
               </button>

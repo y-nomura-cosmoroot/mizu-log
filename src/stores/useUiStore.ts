@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import type { IntakeKind, Medicine, RecordDate } from "@/types/records";
+import type { IntakeKind, Medicine, RecordDate, RecordKind } from "@/types/records";
 import { addMonthsFirst, ymKey } from "@/lib/calendar";
-import { DEFAULT_CUSTOM_ML, TOAST_MS } from "@/lib/constants";
+import { DEFAULT_CUSTOM_ML, TOAST_FIX_MS, TOAST_MS } from "@/lib/constants";
 import { addDays, getRecordDate } from "@/lib/time";
 import type { VitalInput } from "./useAppStore";
 
@@ -12,6 +12,14 @@ export type SheetState =
   | { type: "ml"; id: string; kind: IntakeKind; ml: number }
   | ({ type: "vital"; id: string } & VitalInput)
   | null;
+
+/**
+ * 記録トーストに添える「◯時になおす」導線。
+ * 記録する時間が現在時とズレたまま記録したときだけ付く（hour/minute は押したときに入れ直す時刻）
+ */
+export type ToastFix = { kind: RecordKind; id: string; hour: number; minute: number };
+
+export type ToastState = { msg: string; fix?: ToastFix } | null;
 
 /** おくすりマスタの下書き行(まだstoreには追加していない、確定前の1件分) */
 export type MedicineDraft = Pick<Medicine, "name" | "doseAmount" | "doseUnit">;
@@ -48,11 +56,17 @@ interface UiStore {
   /** 起動時(または最後の syncDay)に計算した「今日」の記録日。日付跨ぎの検知に使う */
   todayKey: RecordDate;
   selHour: number;
+  /**
+   * 現在時刻の「時」(0〜23)。AppShellの毎分tick(と表示復帰)で更新する。
+   * 開いたまま時間が過ぎても再レンダリングが起きるようにするための値で、
+   * 「記録する時間」が現在時とズレていることの表示にだけ使う（selHourは動かさない）
+   */
+  nowHour: number;
   hourDropOpen: boolean;
   calOpen: boolean;
   /** カレンダー表示中の年月（year*12+month0）。nullなら表示日の月 */
   calYM: number | null;
-  toast: string | null;
+  toast: ToastState;
   sheet: SheetState;
   cameraSheet: CameraSheetState;
   medsMasterMode: boolean;
@@ -67,9 +81,10 @@ interface UiStore {
   /** 初回マウント時: URLと現在時刻からUI状態を初期化 */
   init: (now: Date) => void;
   /**
-   * 日付が変わっていたら「今日」を更新する（表示復帰時・1分ごとに呼ぶ）。
-   * 旧「今日」を表示中なら表示日と時刻も新しい今日へ追従させる（開いたまま0時を跨いだ端末が
-   * 前日に記録し続けないため）。過去日を見ているときは表示を動かさない
+   * 「今日」と「いま何時か」を現在時刻に合わせる（表示復帰時・1分ごとに呼ぶ）。
+   * 日付が変わっていて旧「今日」を表示中なら表示日と時刻も新しい今日へ追従させる
+   * （開いたまま0時を跨いだ端末が前日に記録し続けないため）。過去日を見ているときは表示を動かさない。
+   * 日付が変わっていない場合は nowHour だけ更新する（selHourは触らない）
    */
   syncDay: (now: Date) => void;
   setTab: (tab: Tab) => void;
@@ -85,7 +100,8 @@ interface UiStore {
   setHourDropOpen: (v: boolean) => void;
   setCalOpen: (v: boolean) => void;
   setCalYM: (ym: number | null) => void;
-  showToast: (msg: string) => void;
+  /** fix を渡すと「◯時になおす」つきになり、押す時間を見込んで表示も長くなる */
+  showToast: (msg: string, fix?: ToastFix) => void;
   openSheet: (sheet: Exclude<SheetState, null>) => void;
   patchSheet: (patch: Partial<Exclude<SheetState, null>>) => void;
   closeSheet: () => void;
@@ -116,6 +132,7 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   viewDate: "",
   todayKey: "",
   selHour: 0,
+  nowHour: 0,
   hourDropOpen: false,
   calOpen: false,
   calYM: null,
@@ -147,15 +164,18 @@ export const useUiStore = create<UiStore>()((set, get) => ({
       viewDate: getRecordDate(now),
       todayKey: getRecordDate(now),
       selHour: now.getHours(),
+      nowHour: now.getHours(),
     });
   },
   syncDay: (now) =>
     set((s) => {
       const today = getRecordDate(now);
-      if (today === s.todayKey) return s;
+      const nowHour = now.getHours();
+      // 日付が変わっていなければ「いま何時か」だけ追従させる（同じ時なら再レンダリングさせない）
+      if (today === s.todayKey) return nowHour === s.nowHour ? s : { nowHour };
       return s.viewDate === s.todayKey
-        ? { todayKey: today, viewDate: today, selHour: now.getHours(), calYM: null }
-        : { todayKey: today };
+        ? { todayKey: today, viewDate: today, selHour: nowHour, nowHour, calYM: null }
+        : { todayKey: today, nowHour };
     }),
   setTab: (tab) => {
     set({ tab, medsMasterMode: false, hourDropOpen: false, calOpen: false });
@@ -188,10 +208,10 @@ export const useUiStore = create<UiStore>()((set, get) => ({
   setHourDropOpen: (v) => set({ hourDropOpen: v }),
   setCalOpen: (v) => set({ calOpen: v, calYM: null }),
   setCalYM: (ym) => set({ calYM: ym }),
-  showToast: (msg) => {
+  showToast: (msg, fix) => {
     clearTimeout(toastTimer);
-    set({ toast: msg });
-    toastTimer = setTimeout(() => set({ toast: null }), TOAST_MS);
+    set({ toast: { msg, fix } });
+    toastTimer = setTimeout(() => set({ toast: null }), fix ? TOAST_FIX_MS : TOAST_MS);
   },
   openSheet: (sheet) => set({ sheet }),
   patchSheet: (patch) =>

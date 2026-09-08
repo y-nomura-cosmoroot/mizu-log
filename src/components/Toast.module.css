@@ -1,8 +1,12 @@
+/* 中央寄せは left:0/right:0 + margin:auto で行う。left:50%+translateX だと
+   幅の自動計算で使える幅が「画面の半分」になり、折り返す内容が極端に細くなる */
 .toast {
   position: fixed;
   bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: fit-content;
   background: var(--c-primary-700);
   color: #fff;
   font-size: var(--fs-13);
@@ -14,14 +18,49 @@
   white-space: nowrap;
 }
 
+/* 「◯時になおす」つき（記録する時間がズレたまま記録したとき）。
+   2行＋ボタンで pill には収まらないので角丸を落として横並びにする */
+.toast.hasFix {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--r-18);
+  padding: 10px 12px 10px 16px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sub {
+  font-size: var(--fs-10-5);
+  font-weight: var(--fw-medium);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.fixBtn {
+  flex: none;
+  border: none;
+  background: #fff;
+  color: var(--c-primary-700);
+  font-size: var(--fs-11-5);
+  font-weight: var(--fw-black);
+  border-radius: var(--r-pill);
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 /* keyframes は参照するモジュール内に置く（グローバルだと名前が一致しない） */
 @keyframes toastin {
   from {
     opacity: 0;
-    transform: translate(-50%, 10px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }

@@ -65,6 +65,13 @@
   cursor: pointer;
 }
 
+/* ブランド行の右端。ズレ警告の復帰ボタン→「今日に戻る」の順に並ぶ */
+.brandActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* 「今日に戻る」: ブランド行の右端（画面右上）。月ごと表示中は非表示 */
 .todayBtn {
   border: none;
@@ -77,6 +84,42 @@
   box-shadow: var(--sh-btn-s);
   cursor: pointer;
   white-space: nowrap;
+}
+
+/* 記録する時間が現在時とズレているときだけ「今日に戻る」の左に出る復帰ボタン。
+   見落とし防止に点滅させる。赤系の小さい影は既存トークンに無いためワンオフ（--sh-btn-s の赤版） */
+.resetBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: var(--c-danger-600);
+  color: #fff;
+  font-size: var(--fs-10-5);
+  font-weight: var(--fw-black);
+  border-radius: var(--r-pill);
+  padding: 5px 11px;
+  box-shadow: 0 1px 4px rgba(194, 69, 58, 0.15);
+  cursor: pointer;
+  white-space: nowrap;
+  animation: hourblink 1.2s ease-in-out infinite;
+}
+
+.resetIcon {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+
+/* keyframes は参照するモジュール内に置く（グローバルだと名前が一致せず黙って止まる） */
+@keyframes hourblink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .dateWrap {
@@ -182,6 +225,18 @@
 .toggleCaret {
   font-size: var(--fs-11);
   color: var(--c-primary-500);
+}
+
+/* 記録する時間が現在時とズレているとき＝開きっぱなしで時間が過ぎた状態の警告配色
+   （基本配色より後に書いて勝たせる） */
+.toggle.isMismatch {
+  color: var(--c-danger-600);
+  background: var(--c-danger-100);
+  border-color: var(--c-danger-300);
+}
+
+.toggle.isMismatch .toggleCaret {
+  color: var(--c-danger-600);
 }
 
 .hourOverlayZ {

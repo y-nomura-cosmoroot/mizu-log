@@ -15,6 +15,12 @@ export const STORAGE_KEY = "mizu-log";
 /** トースト表示時間(ms) */
 export const TOAST_MS = 2200;
 
+/**
+ * 記録する時間がズレていたときのトースト表示時間(ms)。
+ * 「◯時になおす」を読んで押すまでの時間が要るため通常より長め
+ */
+export const TOAST_FIX_MS = 5000;
+
 /** タイミングマスタの初期値（名前。曜日は全曜日で作る） */
 export const DEFAULT_TIMINGS = ["朝", "昼", "晩"];
 

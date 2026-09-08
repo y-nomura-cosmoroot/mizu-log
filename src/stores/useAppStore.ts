@@ -6,6 +6,7 @@ import type {
   IntakeKind,
   Medicine,
   RecordDate,
+  RecordKind,
   VitalRecord,
   Weekday,
 } from "@/types/records";
@@ -32,16 +33,23 @@ interface AppStore extends AppData {
   hasHydrated: boolean;
   setHasHydrated: (v: boolean) => void;
 
-  addIntake: (kind: IntakeKind, ml: number, date: RecordDate, h: number, m: number) => void;
+  /** 追加したレコードのidを返す（トーストの「◯時になおす」が対象を指すのに使う） */
+  addIntake: (kind: IntakeKind, ml: number, date: RecordDate, h: number, m: number) => string;
   updateIntakeMl: (id: string, ml: number) => void;
   deleteIntake: (id: string) => void;
 
-  addVital: (input: VitalInput, date: RecordDate, h: number, m: number) => void;
+  addVital: (input: VitalInput, date: RecordDate, h: number, m: number) => string;
   updateVital: (id: string, patch: VitalInput) => void;
   deleteVital: (id: string) => void;
 
-  addFlag: (kind: FlagKind, date: RecordDate, h: number, m: number) => void;
+  addFlag: (kind: FlagKind, date: RecordDate, h: number, m: number) => string;
   deleteFlag: (id: string) => void;
+
+  /**
+   * 記録の時刻だけを差し替える（記録日=暦日は変えないので v3 の不変条件を保つ）。
+   * 記録する時間がズレたまま記録したときの「◯時になおす」用
+   */
+  retimeRecord: (kind: RecordKind, id: string, h: number, m: number) => void;
 
   /** チェック済みなら解除、未チェックなら hour でチェック */
   toggleMedCheck: (date: RecordDate, timing: string, hour: number) => void;
@@ -127,13 +135,16 @@ export const useAppStore = create<AppStore>()(
       hasHydrated: false,
       setHasHydrated: (v) => set({ hasHydrated: v }),
 
-      addIntake: (kind, ml, date, h, m) =>
+      addIntake: (kind, ml, date, h, m) => {
+        const id = newId();
         set((s) => ({
           intakes: [
             ...s.intakes,
-            { id: newId(), kind, ml, recordDate: date, recordedAt: toRecordedAt(date, h, m) },
+            { id, kind, ml, recordDate: date, recordedAt: toRecordedAt(date, h, m) },
           ],
-        })),
+        }));
+        return id;
+      },
       updateIntakeMl: (id, ml) =>
         set((s) => ({
           intakes: s.intakes.map((x) => (x.id === id ? { ...x, ml } : x)),
@@ -141,18 +152,21 @@ export const useAppStore = create<AppStore>()(
       deleteIntake: (id) =>
         set((s) => ({ intakes: s.intakes.filter((x) => x.id !== id) })),
 
-      addVital: (input, date, h, m) =>
+      addVital: (input, date, h, m) => {
+        const id = newId();
         set((s) => ({
           vitals: [
             ...s.vitals,
             {
-              id: newId(),
+              id,
               recordDate: date,
               recordedAt: toRecordedAt(date, h, m),
               ...input,
             } satisfies VitalRecord,
           ],
-        })),
+        }));
+        return id;
+      },
       updateVital: (id, patch) =>
         set((s) => ({
           vitals: s.vitals.map((v) => (v.id === id ? { ...v, ...patch } : v)),
@@ -160,15 +174,40 @@ export const useAppStore = create<AppStore>()(
       deleteVital: (id) =>
         set((s) => ({ vitals: s.vitals.filter((v) => v.id !== id) })),
 
-      addFlag: (kind, date, h, m) =>
+      addFlag: (kind, date, h, m) => {
+        const id = newId();
         set((s) => ({
           flags: [
             ...s.flags,
-            { id: newId(), kind, recordDate: date, recordedAt: toRecordedAt(date, h, m) },
+            { id, kind, recordDate: date, recordedAt: toRecordedAt(date, h, m) },
           ],
-        })),
+        }));
+        return id;
+      },
       deleteFlag: (id) =>
         set((s) => ({ flags: s.flags.filter((f) => f.id !== id) })),
+
+      // recordDate は据え置いたまま recordedAt の時刻部分だけ作り直す（暦日はズレない）
+      retimeRecord: (kind, id, h, m) =>
+        set((s) => {
+          if (kind === "intake")
+            return {
+              intakes: s.intakes.map((x) =>
+                x.id === id ? { ...x, recordedAt: toRecordedAt(x.recordDate, h, m) } : x
+              ),
+            };
+          if (kind === "vital")
+            return {
+              vitals: s.vitals.map((x) =>
+                x.id === id ? { ...x, recordedAt: toRecordedAt(x.recordDate, h, m) } : x
+              ),
+            };
+          return {
+            flags: s.flags.map((x) =>
+              x.id === id ? { ...x, recordedAt: toRecordedAt(x.recordDate, h, m) } : x
+            ),
+          };
+        }),
 
       toggleMedCheck: (date, timing, hour) =>
         set((s) => {
